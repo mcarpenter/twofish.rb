@@ -1,0 +1,128 @@
+
+= twofish.rb
+
+Author:: Martin Carpenter
+Email:: mcarpenter@free.fr
+Copyright:: Copyright (c) Martin Carpenter 2009
+
+This class implements the Twofish symmetric encryption algorithm
+in pure Ruby. The original paper describing the cipher "Twofish:
+A 128-Bit Block Cipher" (Schneier, Kelsey, Whiting, Wagner, Hall,
+Ferguson) and further information on Twofish can be found at
+http://www.schneier.com/twofish.html.
+
+This implementation is derived with kind permission
+from Guido Flohr's "pure Perl" module Crypt-Twofish_PP:
+http://search.cpan.org/~guido/Crypt-Twofish_PP-0.17.  The overall
+structure and a good number of the comments from that implementation
+have been retained.
+
+
+=== Example
+
+ECB mode:
+
+    require 'twofish'
+
+    key = '1234567890123456'
+    tf = Twofish.new(key)
+    ciphertext = tf.encrypt('Lorem ipsum dolor sit amet')
+
+CBC mode with manually specified initialization vector (may alternatively
+be specified in constructor options hash):
+
+    require 'twofish'
+
+    key = '1234567890123456'
+    tf = Twofish.new(key, :mode => :cbc)
+    tf.iv = 'abcdefghijklmnoip'
+    ciphertext = tf.encrypt('Lorem ipsum dolor sit amet')
+
+
+=== Unit tests
+
+test_twofish.rb defines the unit tests. The iterative test vectors
+from the original paper are used (although only the final result is
+checked). The CBC mode test vectors were checked using the BouncyCastle
+implementation with JRuby as follows:
+
+
+    include Java
+
+    require 'bcprov-jdk16-145.jar'
+
+    include_class Java::org.bouncycastle.jce.provider.BouncyCastleProvider
+    include_class Java::org.bouncycastle.crypto.modes.CBCBlockCipher
+    include_class Java::org.bouncycastle.crypto.engines.TwofishEngine
+    include_class Java::org.bouncycastle.crypto.params.KeyParameter
+    include_class Java::org.bouncycastle.crypto.params.ParametersWithIV
+
+    plaintext = ("\0"*32).to_java_bytes
+    ciphertext = ("\0"*32).to_java_bytes
+    key = ("\0"*16).to_java_bytes
+    iv = ("\0"*16).to_java_bytes
+    key_parameter = KeyParameter.new(key)
+    cipher_parameter = ParametersWithIV.new(key_parameter, iv)
+    cipher = CBCBlockCipher.new TwofishEngine.new
+    cipher.init(true, cipher_parameter) # true == encrypt
+
+    len = 0
+    while len < plaintext.length
+      len += cipher.processBlock(plaintext, len, ciphertext, len)
+    end
+
+    puts ciphertext.to_a.pack('c*').unpack('H*')
+
+The original block test vectors are available as a
+machine-readable file from http://www.schneier.com/code/ecb_ival.txt
+
+To run the unit tests, type:
+
+    rake test
+
+
+=== Documentation
+
+Aside from this README, rdoc documentation may be built as follows:
+
+    rake rdoc
+
+The documentation will be built in the rdoc subdirectory.
+
+
+=== Bugs, omissions and weaknesses
+
+Encryption and decryption are (not unexpectedly) slow. If you need a
+faster implementation for Ruby then the BouncyCastle provider
+(http://www.bouncycastle.org) plays well with JRuby (http://www.jruby.org).
+See above ("Unit tests") for a sample script.
+
+The original "pure Perl" implementation used Perl's integer pragma.
+This implementation uses a private method mask32 to strip off any high
+order bits in an effort to prevent (slow) promotion of Fixnums to Bignums.
+This is a little clumsy and probably could be quicker.
+
+Ruby >=1.9 introduces string encodings which may break things. Untested.
+
+The only padding mechanisms implemented are "none" (don't pad) and "zero
+byte" (append zero bytes to make up a full block). Zero byte padding has
+a well-known failure mode: if the plaintext terminates in null bytes
+then these may be erroneously removed when un-padding is performed.
+
+If no initialization vector is provided for CBC mode then the system
+random number generator (Kernel#rand) is used to generate one. The system
+random number generator may be weaker than desired.
+
+The IV is not silently prepended to the ciphertext since if
+the resulting ciphertext is transmitted as is this can introduce
+a weakness. IV should ideally be transmitted OOB. There
+is a good explanation of this risk at Terry Ritter's page
+http://www.ciphersbyritter.com/GLOSSARY.HTM#CipherBlockChaining
+
+   if the IV is not enciphered, and if the opponents
+   can intercept and change the IV in transit, they can
+   change the first-block plaintext bit-for-bit, without
+   a block-wide garble. That means an opponent could make
+   systematic changes to the first block plaintext simply
+   by changing the IV.
+
