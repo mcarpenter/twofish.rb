@@ -465,7 +465,7 @@ class Twofish
       ciphertext_block = @iv
     end
     (0..padded_plaintext.length-1).step(BLOCK_SIZE) do |block_ptr|
-      (0..BLOCK_SIZE-1).each { |i| padded_plaintext[block_ptr+i] ^= ciphertext_block[i] } if Mode::CBC == @mode
+      (0..BLOCK_SIZE-1).each { |i| padded_plaintext[block_ptr+i] = ( padded_plaintext[block_ptr+i].ord ^ ciphertext_block[i].ord ).chr } if Mode::CBC == @mode
       result << ciphertext_block = self.encrypt_block(padded_plaintext[block_ptr, BLOCK_SIZE])
     end
     result
@@ -488,7 +488,7 @@ class Twofish
     (0..ciphertext.length-1).step(BLOCK_SIZE) do |block_ptr|
       ciphertext_block = ciphertext[block_ptr, BLOCK_SIZE]
       plaintext_block = self.decrypt_block(ciphertext_block)
-      (0..BLOCK_SIZE-1).each { |i| plaintext_block[i] ^= feedback[i] } if Mode::CBC == @mode
+      (0..BLOCK_SIZE-1).each { |i| plaintext_block[i] = (plaintext_block[i].ord ^ feedback[i].ord).chr } if Mode::CBC == @mode
       result << plaintext_block
       feedback = ciphertext_block
     end
