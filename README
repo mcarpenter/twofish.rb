@@ -102,7 +102,9 @@ This implementation uses a private method mask32 to strip off any high
 order bits in an effort to prevent (slow) promotion of Fixnums to Bignums.
 This is a little clumsy and probably could be quicker.
 
-Ruby >=1.9 introduces string encodings which may break things. Untested.
+Ruby >=1.9 introduces string encodings. The current workaround uses
+#ord and #chr but this is not very satisfactory: it would be preferable
+to move to byte arrays throughout.
 
 The only padding mechanisms implemented are "none" (don't pad) and "zero
 byte" (append zero bytes to make up a full block). Zero byte padding has
