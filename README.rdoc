@@ -25,7 +25,7 @@ ECB mode:
     require 'twofish'
 
     key = '1234567890123456'
-    tf = Twofish.new(key)
+    tf = Twofish.new(key, :padding => :zero_byte)
     ciphertext = tf.encrypt('Lorem ipsum dolor sit amet')
 
 CBC mode with manually specified initialization vector (may alternatively
@@ -34,8 +34,8 @@ be specified in constructor options hash):
     require 'twofish'
 
     key = '1234567890123456'
-    tf = Twofish.new(key, :mode => :cbc)
-    tf.iv = 'abcdefghijklmnoip'
+    tf = Twofish.new(key, :mode => :cbc, :padding => :zero_byte)
+    tf.iv = 'abcdefghijklmnop'
     ciphertext = tf.encrypt('Lorem ipsum dolor sit amet')
 
 
