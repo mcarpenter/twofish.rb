@@ -13,9 +13,12 @@ Rake::TestTask.new('test') do |test|
   test.warning = true
 end
 
-spec = eval( File.read('twofish.gemspec') )
-Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.need_tar = true
+SPECFILE = 'twofish.gemspec'
+if File.exist?(SPECFILE)
+  spec = eval( File.read(SPECFILE) )
+  Rake::GemPackageTask.new(spec) do |pkg|
+    pkg.need_tar = true
+  end
 end
 
 Rake::RDocTask.new do |rdoc|
