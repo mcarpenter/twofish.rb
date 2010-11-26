@@ -1,7 +1,8 @@
 
 require 'rake'
-require 'rake/rdoctask'
+require 'rake/clean'
 require 'rake/gempackagetask'
+require 'rake/rdoctask'
 require 'rake/testtask'
 
 desc 'Default task (test)'
@@ -30,11 +31,5 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('README.rdoc')
   rdoc.rdoc_files.include('lib/twofish.rb')
   rdoc.rdoc_files.include('test/test_twofish.rb')
-end
-
-desc 'Clean up'
-task :clean do
-  FileUtils.rm( Dir.glob( File.join('pkg', '*') ) )
-  FileUtils.rm_r( Dir.glob( File.join('rdoc', '*') ) )
 end
 
