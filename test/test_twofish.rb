@@ -33,7 +33,7 @@ class TestBasics < Test::Unit::TestCase
   end
 
   def test_block_size
-    assert(16, BLOCK_SIZE)
+    assert_equal(16, BLOCK_SIZE)
   end
 
   def test_default_mode
