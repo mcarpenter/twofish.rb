@@ -365,7 +365,7 @@ class Twofish
       sb, sa, s9, s8 = *mds_rem(le_longs[0], le_longs[1])
       s7, s6, s5, s4 = *mds_rem(le_longs[2], le_longs[3])
       s3, s2, s1, s0 = *mds_rem(le_longs[4], le_longs[5])
-      i, j = 0, 1
+      j = 1
       (0..38).step(2) do |i|
         j = i + 1
         a = M0[Q0[Q0[Q1[i] ^ key[16]] ^ key[8]]  ^ key[0]] ^
@@ -393,7 +393,7 @@ class Twofish
       sb, sa, s9, s8 = *mds_rem(le_longs[2], le_longs[3])
       s7, s6, s5, s4 = *mds_rem(le_longs[4], le_longs[5])
       s3, s2, s1, s0 = *mds_rem(le_longs[6], le_longs[7])
-      i, j = 0, 1
+      j = 1
       (0..38).step(2) do |i|
         j = i + 1
         a = M0[Q0[Q0[Q1[Q1[i] ^ key[24]] ^ key[16]] ^ key[8]]  ^ key[0]] ^
