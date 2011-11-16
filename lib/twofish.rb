@@ -1158,6 +1158,8 @@ module Padding
     when ZERO_BYTE
       unless remainder.zero?
         plaintext.dup << "\0" * (block_size - remainder)
+      else
+        plaintext.dup
       end
     end
   end
