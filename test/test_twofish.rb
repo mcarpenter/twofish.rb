@@ -286,5 +286,8 @@ class TestPadding < TestBasics
     assert_equal(TO_PAD, Padding::unpad(TO_PAD+"\0"*10, BLOCK_SIZE, :zero_byte))
   end
 
+  def test_pad_block_size_zero_byte
+    to_pad = TO_PAD * BLOCK_SIZE
+    assert_equal(to_pad, Padding::pad(to_pad, BLOCK_SIZE, :zero_byte))
+  end
 end
-
