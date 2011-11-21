@@ -29,8 +29,7 @@ end
 RDoc::Task.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = 'twofish.rb'
-  rdoc.options << '--line-numbers' << '--inline-source'
-  rdoc.options << '-A cattr_accessor=object'
+  rdoc.options << '--line-numbers'
   rdoc.options << '--charset' << 'utf-8'
   rdoc.options << '--all'
   rdoc.rdoc_files.include('README.rdoc')
