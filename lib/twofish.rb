@@ -349,9 +349,9 @@ class Twofish
             M2[Q1[Q0[j] ^ key[14]] ^ key[6]] ^
             M3[Q1[Q1[j] ^ key[15]] ^ key[7]]
         b = ((b & 0xffffff) << 8) | (b >> 24)
-        a = mask32(a+b)
+        a = 0xffffffff & (a+b)
         @k.push(a)
-        a = mask32(a+b)
+        a = 0xffffffff & (a+b)
         @k.push((a & 0x7fffff) << 9 | a >> 23)
       end
       (0..255).each do |i|
@@ -375,9 +375,9 @@ class Twofish
             M2[Q1[Q0[Q0[j] ^ key[22]] ^ key[14]] ^ key[6]] ^
             M3[Q1[Q1[Q0[j] ^ key[23]] ^ key[15]] ^ key[7]]
         b = ((b & 0xffffff) << 8) | (b >> 24)
-        a = mask32(a+b)
+        a = 0xffffffff & (a+b)
         @k.push(a)
-        a = mask32(a+b)
+        a = 0xffffffff & (a+b)
         @k.push((a & 0x7fffff) << 9 | a >> 23)
       end
       (0..255).each do |i|
@@ -402,9 +402,9 @@ class Twofish
             M2[Q1[Q0[Q0[Q0[j] ^ key[30]] ^ key[22]] ^ key[14]] ^ key[6]] ^
             M3[Q1[Q1[Q0[Q1[j] ^ key[31]] ^ key[23]] ^ key[15]] ^ key[7]]
         b = ((b & 0xffffff) << 8) | (b >> 24)
-        a = mask32(a+b)
+        a = 0xffffffff & (a+b)
         @k.push(a)
-        a = mask32(a+b)
+        a = 0xffffffff & (a+b)
         @k.push((a & 0x7fffff) << 9 | a >> 23)
       end
       (0..255).each do |i|
@@ -513,11 +513,11 @@ class Twofish
          xS2[(r1 >> 8) & 0xff] ^
          xS3[(r1 >> 16) & 0xff]
 
-    r2 ^= mask32(t0 + t1 + @k[8])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[8])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
 
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[9])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[9])
 
     t0 = xS0[r2 & 0xff] ^
          xS1[(r2 >> 8) & 0xff] ^
@@ -528,11 +528,11 @@ class Twofish
          xS2[(r3 >> 8) & 0xff] ^
          xS3[(r3 >> 16) & 0xff]
 
-    r0 ^= mask32(t0 + t1 + @k[10])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[10])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
 
     r1 = ((r1 >> 31) & 1) | (r1 & 0x7fffffff) << 1
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[11])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[11])
 
     # i = 1
     t0 = xS0[r0 & 0xff] ^
@@ -544,11 +544,11 @@ class Twofish
          xS2[(r1 >> 8) & 0xff] ^
          xS3[(r1 >> 16) & 0xff]
 
-    r2 ^= mask32(t0 + t1 + @k[12])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[12])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
 
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[13])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[13])
 
     t0 = xS0[r2 & 0xff] ^
          xS1[(r2 >> 8) & 0xff] ^
@@ -559,11 +559,11 @@ class Twofish
          xS2[(r3 >> 8) & 0xff] ^
          xS3[(r3 >> 16) & 0xff]
 
-    r0 ^= mask32(t0 + t1 + @k[14])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[14])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
 
     r1 = ((r1 >> 31) & 1) | (r1 & 0x7fffffff) << 1
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[15])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[15])
 
     # i = 2
     t0 = xS0[r0 & 0xff] ^
@@ -575,11 +575,11 @@ class Twofish
          xS2[(r1 >> 8) & 0xff] ^
          xS3[(r1 >> 16) & 0xff]
 
-    r2 ^= mask32(t0 + t1 + @k[16])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[16])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
 
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[17])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[17])
 
     t0 = xS0[r2 & 0xff] ^
          xS1[(r2 >> 8) & 0xff] ^
@@ -590,11 +590,11 @@ class Twofish
          xS2[(r3 >> 8) & 0xff] ^
          xS3[(r3 >> 16) & 0xff]
 
-    r0 ^= mask32(t0 + t1 + @k[18])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[18])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
 
     r1 = ((r1 >> 31) & 1) | (r1 & 0x7fffffff) << 1
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[19])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[19])
 
     # i = 3
     t0 = xS0[r0 & 0xff] ^
@@ -606,11 +606,11 @@ class Twofish
          xS2[(r1 >> 8) & 0xff] ^
          xS3[(r1 >> 16) & 0xff]
 
-    r2 ^= mask32(t0 + t1 + @k[20])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[20])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
 
     r3 = ((r3 >> 31) & 1) | ((r3 & 0x7fffffff) << 1)
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[21])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[21])
 
     t0 = xS0[r2 & 0xff] ^
          xS1[(r2 >> 8) & 0xff] ^
@@ -621,11 +621,11 @@ class Twofish
          xS2[(r3 >> 8) & 0xff] ^
          xS3[(r3 >> 16) & 0xff]
 
-    r0 ^= mask32(t0 + t1 + @k[22])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[22])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
 
     r1 = ((r1 >> 31) & 1) | (r1 & 0x7fffffff) << 1
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[23])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[23])
 
     # i = 4
     t0 = xS0[r0 & 0xff] ^
@@ -637,11 +637,11 @@ class Twofish
          xS2[(r1 >> 8) & 0xff] ^
          xS3[(r1 >> 16) & 0xff]
 
-    r2 ^= mask32(t0 + t1 + @k[24])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[24])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
 
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[25])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[25])
 
     t0 = xS0[r2 & 0xff] ^
          xS1[(r2 >> 8) & 0xff] ^
@@ -652,11 +652,11 @@ class Twofish
          xS2[(r3 >> 8) & 0xff] ^
          xS3[(r3 >> 16) & 0xff]
 
-    r0 ^= mask32(t0 + t1 + @k[26])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[26])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
 
     r1 = ((r1 >> 31) & 1) | ((r1 & 0x7fffffff) << 1)
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[27])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[27])
 
     # i = 5
     t0 = xS0[r0 & 0xff] ^
@@ -668,11 +668,11 @@ class Twofish
          xS2[(r1 >> 8) & 0xff] ^
          xS3[(r1 >> 16) & 0xff]
 
-    r2 ^= mask32(t0 + t1 + @k[28])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[28])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
 
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[29])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[29])
 
     t0 = xS0[r2 & 0xff] ^
          xS1[(r2 >> 8) & 0xff] ^
@@ -683,11 +683,11 @@ class Twofish
          xS2[(r3 >> 8) & 0xff] ^
          xS3[(r3 >> 16) & 0xff]
 
-    r0 ^= mask32(t0 + t1 + @k[30])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[30])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
 
     r1 = ((r1 >> 31) & 1) | (r1 & 0x7fffffff) << 1
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[31])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[31])
 
     # i = 6
     t0 = xS0[r0 & 0xff] ^
@@ -699,11 +699,11 @@ class Twofish
          xS2[(r1 >> 8) & 0xff] ^
          xS3[(r1 >> 16) & 0xff]
 
-    r2 ^= mask32(t0 + t1 + @k[32])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[32])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
 
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[33])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[33])
 
     t0 = xS0[r2 & 0xff] ^
          xS1[(r2 >> 8) & 0xff] ^
@@ -714,11 +714,11 @@ class Twofish
          xS2[(r3 >> 8) & 0xff] ^
          xS3[(r3 >> 16) & 0xff]
 
-    r0 ^= mask32(t0 + t1 + @k[34])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[34])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
 
     r1 = ((r1 >> 31) & 1) | (r1 & 0x7fffffff) << 1
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[35])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[35])
 
     # i = 7
     t0 = xS0[r0 & 0xff] ^
@@ -730,11 +730,11 @@ class Twofish
          xS2[(r1 >> 8) & 0xff] ^
          xS3[(r1 >> 16) & 0xff]
 
-    r2 ^= mask32(t0 + t1 + @k[36])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[36])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
 
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[37])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[37])
 
     t0 = xS0[r2 & 0xff] ^
          xS1[(r2 >> 8) & 0xff] ^
@@ -745,11 +745,11 @@ class Twofish
          xS2[(r3 >> 8) & 0xff] ^
          xS3[(r3 >> 16) & 0xff]
 
-    r0 ^= mask32(t0 + t1 + @k[38])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[38])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
 
     r1 = ((r1 >> 31) & 1) | (r1 & 0x7fffffff) << 1
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[39])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[39])
 
     [@k[4] ^ r2, @k[5] ^ r3, @k[6] ^ r0, @k[7] ^ r1].pack("V4")
   end
@@ -777,9 +777,9 @@ class Twofish
          xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
-    r2 ^= mask32(t0 + t1 + @k[38])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[38])
 
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[39])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[39])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
     t0 = xS0[r2 & 0xff] ^
@@ -792,9 +792,9 @@ class Twofish
          xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
-    r0 ^= mask32(t0 + t1 + @k[36])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[36])
 
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[37])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[37])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 6
@@ -808,9 +808,9 @@ class Twofish
          xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
-    r2 ^= mask32(t0 + t1 + @k[34])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[34])
 
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[35])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[35])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
     t0 = xS0[r2 & 0xff] ^
@@ -823,9 +823,9 @@ class Twofish
          xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
-    r0 ^= mask32(t0 + t1 + @k[32])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[32])
 
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[33])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[33])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 5
@@ -839,9 +839,9 @@ class Twofish
          xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
-    r2 ^= mask32(t0 + t1 + @k[30])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[30])
 
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[31])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[31])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
     t0 = xS0[r2 & 0xff] ^
@@ -854,9 +854,9 @@ class Twofish
          xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
-    r0 ^= mask32(t0 + t1 + @k[28])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[28])
 
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[29])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[29])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 4
@@ -870,9 +870,9 @@ class Twofish
          xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
-    r2 ^= mask32(t0 + t1 + @k[26])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[26])
 
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[27])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[27])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
     t0 = xS0[r2 & 0xff] ^
@@ -885,9 +885,9 @@ class Twofish
          xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
-    r0 ^= mask32(t0 + t1 + @k[24])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[24])
 
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[25])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[25])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
 
@@ -902,9 +902,9 @@ class Twofish
          xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
-    r2 ^= mask32(t0 + t1 + @k[22])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[22])
 
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[23])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[23])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
     t0 = xS0[r2 & 0xff] ^
@@ -917,9 +917,9 @@ class Twofish
          xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
-    r0 ^= mask32(t0 + t1 + @k[20])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[20])
 
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[21])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[21])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 2
@@ -933,9 +933,9 @@ class Twofish
          xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
-    r2 ^= mask32(t0 + t1 + @k[18])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[18])
 
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[19])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[19])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
     t0 = xS0[r2 & 0xff] ^
@@ -948,9 +948,9 @@ class Twofish
          xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
-    r0 ^= mask32(t0 + t1 + @k[16])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[16])
 
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[17])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[17])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 1
@@ -964,9 +964,9 @@ class Twofish
          xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
-    r2 ^= mask32(t0 + t1 + @k[14])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[14])
 
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[15])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[15])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
     t0 = xS0[r2 & 0xff] ^
@@ -979,9 +979,9 @@ class Twofish
          xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
-    r0 ^= mask32(t0 + t1 + @k[12])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[12])
 
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[13])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[13])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 0
@@ -995,9 +995,9 @@ class Twofish
          xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
-    r2 ^= mask32(t0 + t1 + @k[10])
+    r2 ^= 0xffffffff & (t0 + t1 + @k[10])
 
-    r3 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[11])
+    r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[11])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
     t0 = xS0[r2 & 0xff] ^
@@ -1010,9 +1010,9 @@ class Twofish
          xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
-    r0 ^= mask32(t0 + t1 + @k[8])
+    r0 ^= 0xffffffff & (t0 + t1 + @k[8])
 
-    r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[9])
+    r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[9])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     [@k[0] ^ r2, @k[1] ^ r3, @k[2] ^ r0, @k[3] ^ r1].pack("V4")
@@ -1076,11 +1076,6 @@ private
     end
 
     [ b >> 24, b >> 16 & 0xff, b >> 8 & 0xff, b & 0xff ]
-  end
-
-  # Retain only lowest 32 bits of the given integer.
-  def mask32(x)
-    x & 0xffffffff
   end
 
   # Generates a random initialization vector of the given length.
