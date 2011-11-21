@@ -86,6 +86,29 @@ class TestEcbEncryption < TestBasics
     assert_equal(plaintext, tf.decrypt(ciphertext))
   end
 
+  def test_utf8_plaintext_invalid_length
+    # this string is 16 chars in length, but 18 bytes
+    plaintext = pack_bytes('72c3a973657276c3a96573') + # 11 bytes, 9 chars
+      '1234567' # 7 bytes, 7 chars
+    plaintext.force_encoding('UTF-8')
+    key = pack_bytes('37fe26ff1cf66175f5ddf4c33b97a205')
+    tf = Twofish.new(key)
+    assert_raise ArgumentError do
+      ciphertext = tf.encrypt(plaintext)
+    end
+  end
+
+  def test_utf8_plaintext
+    # this string is 16 bytes in length (but 14 chars)
+    plaintext = pack_bytes('72c3a973657276c3a96573') + # 11 bytes, 9 chars
+      '12345' # 5 bytes, 5 chars
+    plaintext.force_encoding('UTF-8')
+    key = pack_bytes('37fe26ff1cf66175f5ddf4c33b97a205')
+    tf = Twofish.new(key)
+    ciphertext = tf.encrypt(plaintext)
+    assert_equal(plaintext.force_encoding('ASCII-8BIT'), tf.decrypt(ciphertext))
+  end
+
   private
 
   # Convert ASCII hex representation into binary.
@@ -122,10 +145,13 @@ class TestCbcEncryption < TestBasics
 
   def test_encryption_decryption_random_iv
     tf = Twofish.new(NULL_KEY_16_BYTES, :mode => :cbc)
-    ciphertext = tf.encrypt(LONG_PLAINTEXT)
+    plaintext = LONG_PLAINTEXT
+    ciphertext = tf.encrypt(plaintext)
+    assert_equal(LONG_PLAINTEXT, plaintext)
     iv = tf.iv
     tf2 = Twofish.new(NULL_KEY_16_BYTES, :mode => :cbc, :iv => iv)
     assert_equal(LONG_PLAINTEXT, tf2.decrypt(ciphertext))
+    assert_equal(LONG_PLAINTEXT, plaintext)
   end
 
   def test_encryption_given_null_iv

@@ -32,33 +32,40 @@ class Twofish
       scheme_sym
     end
 
-    # Pad the given plaintext to a complete number of blocks. If
-    # the padding scheme is :none and the plaintext is not a whole
-    # number of blocks then ArgumentError is thrown.
+    # Pad the given plaintext to a complete number of blocks,
+    # returning a new string. See #pad!.
     def self.pad(plaintext, block_size, scheme=DEFAULT)
-      scheme_sym = validate(scheme)
+      self.pad!(plaintext.dup, block_size, scheme)
+    end
+
+    # Pad the given plaintext to a complete number of blocks,
+    # returning a new string. If the padding scheme is :none
+    # and the plaintext is not a whole number of blocks then
+    # ArgumentError is thrown.
+    def self.pad!(plaintext, block_size, scheme=DEFAULT)
       remainder = plaintext.length % block_size
-      case scheme_sym
+      case validate(scheme)
       when NONE
         raise ArgumentError, "no padding scheme specified and plaintext length is not a multiple of the block size" unless remainder.zero?
-        plaintext.dup
+        plaintext
       when ZERO_BYTE
-        unless remainder.zero?
-          plaintext.dup << "\0" * (block_size - remainder)
-        else
-          plaintext.dup
-        end
+        remainder.zero? ? plaintext : plaintext << "\0" * (block_size - remainder)
       end
     end
 
-    # Unpad the given plaintext using the given scheme.
+    # Unpad the given plaintext using the given scheme, returning
+    # a new string. See #unpad!.
     def self.unpad(plaintext, block_size, scheme=DEFAULT)
-      scheme_sym = validate(scheme)
-      case scheme_sym
+      self.unpad!(plaintext.dup, block_size, scheme)
+    end
+
+    # Unpad the given plaintext in place using the given scheme.
+    def self.unpad!(plaintext, block_size, scheme=DEFAULT)
+      case validate(scheme)
       when NONE
         plaintext.dup
       when ZERO_BYTE
-        plaintext.dup.sub(/\000+\Z/, '')
+        plaintext.sub(/\000+\Z/, '')
       end
     end
 

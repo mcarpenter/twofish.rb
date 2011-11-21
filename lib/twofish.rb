@@ -469,15 +469,17 @@ class Twofish
   # Encrypt a plaintext string, chunking as required for
   # CBC mode.
   def encrypt(plaintext)
-    padded_plaintext = Padding.pad(plaintext, BLOCK_SIZE, @padding)
+    plaintext = plaintext.dup.force_encoding('ASCII-8BIT')
+    padded_plaintext = Padding.pad!(plaintext, BLOCK_SIZE, @padding)
     result = ''.force_encoding('ASCII-8BIT')
     if @mode == Mode::CBC
       @iv = generate_iv(BLOCK_SIZE) unless @iv
       ciphertext_block = @iv
     end
     (0...padded_plaintext.length).step(BLOCK_SIZE) do |block_ptr|
-      (0...BLOCK_SIZE).each { |i| padded_plaintext[block_ptr+i] = ( padded_plaintext[block_ptr+i].ord ^ ciphertext_block[i].ord ).chr } if Mode::CBC == @mode
-      result << ciphertext_block = encrypt_block(padded_plaintext[block_ptr, BLOCK_SIZE])
+      plaintext_block = padded_plaintext[block_ptr, BLOCK_SIZE]
+      xor_block!(plaintext_block, ciphertext_block) if Mode::CBC == @mode
+      result << ciphertext_block = encrypt_block(plaintext_block)
     end
     result
   end
@@ -486,7 +488,8 @@ class Twofish
   # chaining modes. If @iv is not set then we use the first block
   # as the initialization vector when chaining.
   def decrypt(ciphertext)
-    raise ArgumentError, "Ciphertext is not a multiple of #{BLOCK_SIZE} bytes" unless (ciphertext.length % BLOCK_SIZE).zero?
+    ciphertext = ciphertext.dup.force_encoding('ASCII-8BIT')
+    raise ArgumentError, "ciphertext is not a multiple of #{BLOCK_SIZE} bytes" unless (ciphertext.length % BLOCK_SIZE).zero?
     result = ''.force_encoding('ASCII-8BIT')
     if Mode::CBC == @mode
       if @iv
@@ -499,11 +502,17 @@ class Twofish
     (0...ciphertext.length).step(BLOCK_SIZE) do |block_ptr|
       ciphertext_block = ciphertext[block_ptr, BLOCK_SIZE]
       plaintext_block = decrypt_block(ciphertext_block)
-      (0...BLOCK_SIZE).each { |i| plaintext_block[i] = (plaintext_block[i].ord ^ feedback[i].ord).chr } if Mode::CBC == @mode
+      xor_block!(plaintext_block, feedback) if Mode::CBC == @mode
       result << plaintext_block
       feedback = ciphertext_block
     end
-    Padding.unpad(result, BLOCK_SIZE, @padding)
+    Padding.unpad!(result, BLOCK_SIZE, @padding)
+  end
+
+  # Exclusive-or two blocks together, byte-by-byte, storing the result
+  # in the first block.
+  def xor_block!(target, source)
+    (0...BLOCK_SIZE).each { |i| target[i] = (target[i].ord ^ source[i].ord).chr }
   end
 
   # Encrypt a single block (16 bytes).
@@ -901,7 +910,6 @@ class Twofish
     r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[25])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
-
     # i = 3
     t0 = @xS0[r0 & 0xff] ^
          @xS1[r0 >> 8 & 0xff] ^
@@ -1094,7 +1102,7 @@ private
   def generate_iv(block_size)
     Array.new(block_size).
       map{ |x| rand(256) }.
-      pack("C#{block_size}")
+      pack("C#{block_size}") # defaults to ASCII-8BIT encoding
   end
 
 end
