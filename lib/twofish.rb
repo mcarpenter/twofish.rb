@@ -352,7 +352,7 @@ class Twofish
         a = mask32(a+b)
         @k.push(a)
         a = mask32(a+b)
-        @k.push(mask32(a << 9) | a >> 23)
+        @k.push((a & 0x7fffff) << 9 | a >> 23)
       end
       (0..255).each do |i|
         xS0[i] = M0[Q0[Q0[i] ^ s4] ^ s0]
@@ -378,7 +378,7 @@ class Twofish
         a = mask32(a+b)
         @k.push(a)
         a = mask32(a+b)
-        @k.push(mask32(a << 9) | a >> 23)
+        @k.push((a & 0x7fffff) << 9 | a >> 23)
       end
       (0..255).each do |i|
         xS0[i] = M0[Q0[Q0[Q1[i] ^ s8] ^ s4] ^ s0]
@@ -405,7 +405,7 @@ class Twofish
         a = mask32(a+b)
         @k.push(a)
         a = mask32(a+b)
-        @k.push(mask32(a << 9) | a >> 23)
+        @k.push((a & 0x7fffff) << 9 | a >> 23)
       end
       (0..255).each do |i|
         xS0[i] = M0[Q0[Q0[Q1[Q1[i]^sc]^s8]^s4]^s0]
