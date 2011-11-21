@@ -348,7 +348,7 @@ class Twofish
             M1[Q0[Q1[j] ^ key[13]] ^ key[5]] ^
             M2[Q1[Q0[j] ^ key[14]] ^ key[6]] ^
             M3[Q1[Q1[j] ^ key[15]] ^ key[7]]
-        b = mask32(b << 8) | (b >> 24)
+        b = ((b & 0xffffff) << 8) | (b >> 24)
         a = mask32(a+b)
         @k.push(a)
         a = mask32(a+b)
@@ -374,7 +374,7 @@ class Twofish
             M1[Q0[Q1[Q1[j] ^ key[21]] ^ key[13]] ^ key[5]] ^
             M2[Q1[Q0[Q0[j] ^ key[22]] ^ key[14]] ^ key[6]] ^
             M3[Q1[Q1[Q0[j] ^ key[23]] ^ key[15]] ^ key[7]]
-        b = mask32(b << 8) | (b >> 24)
+        b = ((b & 0xffffff) << 8) | (b >> 24)
         a = mask32(a+b)
         @k.push(a)
         a = mask32(a+b)
@@ -401,7 +401,7 @@ class Twofish
             M1[Q0[Q1[Q1[Q0[j] ^ key[29]] ^ key[21]] ^ key[13]] ^ key[5]] ^
             M2[Q1[Q0[Q0[Q0[j] ^ key[30]] ^ key[22]] ^ key[14]] ^ key[6]] ^
             M3[Q1[Q1[Q0[Q1[j] ^ key[31]] ^ key[23]] ^ key[15]] ^ key[7]]
-        b = mask32(b << 8) | (b >> 24)
+        b = ((b & 0xffffff) << 8) | (b >> 24)
         a = mask32(a+b)
         @k.push(a)
         a = mask32(a+b)
