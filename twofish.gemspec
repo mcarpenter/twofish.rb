@@ -15,6 +15,6 @@ Gem::Specification.new do |s|
   s.rubyforge_project = nil
   s.summary = 'Twofish symmetric cipher in pure Ruby'
   s.test_files = Dir[ "test/**/test_*.rb" ]
-  s.version = '1.0.1'
+  s.version = '1.0.2'
 end
 
