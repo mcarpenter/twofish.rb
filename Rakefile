@@ -1,9 +1,9 @@
 
 require 'rake'
 require 'rake/clean'
-require 'rake/gempackagetask'
-require 'rake/rdoctask'
 require 'rake/testtask'
+require 'rdoc/task'
+require 'rubygems/package_task'
 
 desc 'Default task (test)'
 task :default => [:test]
@@ -16,12 +16,12 @@ end
 SPECFILE = 'twofish.gemspec'
 if File.exist?(SPECFILE)
   spec = eval( File.read(SPECFILE) )
-  Rake::GemPackageTask.new(spec) do |pkg|
+  Gem::PackageTask.new(spec) do |pkg|
     pkg.need_tar = true
   end
 end
 
-Rake::RDocTask.new do |rdoc|
+RDoc::Task.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = 'twofish.rb'
   rdoc.options << '--line-numbers' << '--inline-source'
