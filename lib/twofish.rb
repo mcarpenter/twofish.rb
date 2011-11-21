@@ -668,7 +668,7 @@ class Twofish
          xS2[(r1 >> 8) & 0xff] ^
          xS3[(r1 >> 16) & 0xff]
 
-    r2  ^= mask32(t0 + t1 + @k[28])
+    r2 ^= mask32(t0 + t1 + @k[28])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
 
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
