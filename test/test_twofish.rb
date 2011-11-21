@@ -74,7 +74,7 @@ class TestEcbEncryption < TestBasics
     key = pack_bytes('37fe26ff1cf66175f5ddf4c33b97a205')
     tf = Twofish.new(key)
     assert_raise ArgumentError do
-      ciphertext = tf.encrypt(plaintext)
+      tf.encrypt(plaintext)
     end
   end
 
