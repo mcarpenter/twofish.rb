@@ -8,9 +8,22 @@
 # encryption algorithm based on original work by Guido Flohr.
 class Twofish
 
-  attr_reader :iv, :key_size, :mode, :padding # setters for iv, mode defined below for validation
+  # Setters for iv, mode defined below for validation
 
-  BLOCK_SIZE = 16 # 16 bytes, 128 bits
+  # Initialization vector for CBC mode.
+  attr_reader :iv
+
+  # The size of the key in bytes (16, 24, 32 bytes).
+  attr_reader :key_size
+
+  # Encryption mode eg Mode::ECB (default) or Mode::CBC.
+  attr_reader :mode
+
+  # Padding algorithm eg Padding::NONE (default) or Padding::ZERO_BYTE.
+  attr_reader :padding
+
+  # The block size in bytes (16).
+  BLOCK_SIZE = 16
 
   #:stopdoc:
   Q0 = [
@@ -1088,9 +1101,16 @@ end
 # and CBC (Cipher Block Chaining).
 module Mode
 
+  # Electronic code book mode.
   ECB = :ecb
+
+  # Cipher block chaining mode.
   CBC = :cbc
+
+  # Array of all known modes.
   ALL = [ CBC, ECB ]
+
+  # Default mode (ECB).
   DEFAULT = ECB
 
   # Takes a string or symbol and returns the lowercased
@@ -1115,9 +1135,16 @@ end
 # A more sensible padding scheme should be used in this case.
 module Padding
 
+  # Use no padding.
   NONE = :none
+
+  # Use zero byte padding.
   ZERO_BYTE = :zero_byte
+
+  # Array of all known paddings.
   ALL = [ NONE, ZERO_BYTE ]
+
+  # Default padding (none).
   DEFAULT = NONE
 
   # Takes a string or symbol and returns the lowercased
