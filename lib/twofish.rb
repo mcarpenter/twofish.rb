@@ -333,7 +333,7 @@ class Twofish
     # The relevant lookup tables qN have been precomputed and stored in
     # tables.h; we also perform full key precomputations incorporating
     # the MDS matrix multiplications.
-    xS0, xS1, xS2, xS3 = [], [], [], []
+    @xS0, @xS1, @xS2, @xS3 = [], [], [], []
     case @key_size
     when 16
       s7, s6, s5, s4 = *mds_rem(le_longs[0], le_longs[1])
@@ -355,10 +355,10 @@ class Twofish
         @k.push((a & 0x7fffff) << 9 | a >> 23)
       end
       (0..255).each do |i|
-        xS0[i] = M0[Q0[Q0[i] ^ s4] ^ s0]
-        xS1[i] = M1[Q0[Q1[i] ^ s5] ^ s1]
-        xS2[i] = M2[Q1[Q0[i] ^ s6] ^ s2]
-        xS3[i] = M3[Q1[Q1[i] ^ s7] ^ s3]
+        @xS0[i] = M0[Q0[Q0[i] ^ s4] ^ s0]
+        @xS1[i] = M1[Q0[Q1[i] ^ s5] ^ s1]
+        @xS2[i] = M2[Q1[Q0[i] ^ s6] ^ s2]
+        @xS3[i] = M3[Q1[Q1[i] ^ s7] ^ s3]
       end
     when 24
       sb, sa, s9, s8 = *mds_rem(le_longs[0], le_longs[1])
@@ -381,10 +381,10 @@ class Twofish
         @k.push((a & 0x7fffff) << 9 | a >> 23)
       end
       (0..255).each do |i|
-        xS0[i] = M0[Q0[Q0[Q1[i] ^ s8] ^ s4] ^ s0]
-        xS1[i] = M1[Q0[Q1[Q1[i] ^ s9] ^ s5] ^ s1]
-        xS2[i] = M2[Q1[Q0[Q0[i] ^ sa] ^ s6] ^ s2]
-        xS3[i] = M3[Q1[Q1[Q0[i] ^ sb] ^ s7] ^ s3]
+        @xS0[i] = M0[Q0[Q0[Q1[i] ^ s8] ^ s4] ^ s0]
+        @xS1[i] = M1[Q0[Q1[Q1[i] ^ s9] ^ s5] ^ s1]
+        @xS2[i] = M2[Q1[Q0[Q0[i] ^ sa] ^ s6] ^ s2]
+        @xS3[i] = M3[Q1[Q1[Q0[i] ^ sb] ^ s7] ^ s3]
       end
     when 32
       sf, se, sd, sc = *mds_rem(le_longs[0], le_longs[1])
@@ -408,16 +408,14 @@ class Twofish
         @k.push((a & 0x7fffff) << 9 | a >> 23)
       end
       (0..255).each do |i|
-        xS0[i] = M0[Q0[Q0[Q1[Q1[i]^sc]^s8]^s4]^s0]
-        xS1[i] = M1[Q0[Q1[Q1[Q0[i]^sd]^s9]^s5]^s1]
-        xS2[i] = M2[Q1[Q0[Q0[Q0[i]^se]^sa]^s6]^s2]
-        xS3[i] = M3[Q1[Q1[Q0[Q1[i]^sf]^sb]^s7]^s3]
+        @xS0[i] = M0[Q0[Q0[Q1[Q1[i]^sc]^s8]^s4]^s0]
+        @xS1[i] = M1[Q0[Q1[Q1[Q0[i]^sd]^s9]^s5]^s1]
+        @xS2[i] = M2[Q1[Q0[Q0[Q0[i]^se]^sa]^s6]^s2]
+        @xS3[i] = M3[Q1[Q1[Q0[Q1[i]^sf]^sb]^s7]^s3]
       end
     else
       raise ArgumentError, "invalid key length #{@key_size} (expecting 16, 24 or 32 bytes)"
     end
-
-    @s = [ xS0, xS1, xS2, xS3 ]
 
   end
 
@@ -501,17 +499,15 @@ class Twofish
     r2 = @k[2] ^ words[2]
     r3 = @k[3] ^ words[3]
 
-    xS0, xS1, xS2, xS3 = *@s
-
     # i = 0
-    t0 = xS0[r0 & 0xff] ^
-         xS1[(r0 >> 8) & 0xff] ^
-         xS2[(r0 >> 16) & 0xff] ^
-         xS3[(r0 >> 24) & 0xff]
-    t1 = xS0[(r1 >> 24) & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[(r1 >> 8) & 0xff] ^
-         xS3[(r1 >> 16) & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[(r0 >> 8) & 0xff] ^
+         @xS2[(r0 >> 16) & 0xff] ^
+         @xS3[(r0 >> 24) & 0xff]
+    t1 = @xS0[(r1 >> 24) & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[(r1 >> 8) & 0xff] ^
+         @xS3[(r1 >> 16) & 0xff]
 
     r2 ^= 0xffffffff & (t0 + t1 + @k[8])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
@@ -519,14 +515,14 @@ class Twofish
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[9])
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[(r2 >> 8) & 0xff] ^
-         xS2[(r2 >> 16) & 0xff] ^
-         xS3[(r2 >> 24) & 0xff]
-    t1 = xS0[(r3 >> 24) & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[(r3 >> 8) & 0xff] ^
-         xS3[(r3 >> 16) & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[(r2 >> 8) & 0xff] ^
+         @xS2[(r2 >> 16) & 0xff] ^
+         @xS3[(r2 >> 24) & 0xff]
+    t1 = @xS0[(r3 >> 24) & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[(r3 >> 8) & 0xff] ^
+         @xS3[(r3 >> 16) & 0xff]
 
     r0 ^= 0xffffffff & (t0 + t1 + @k[10])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
@@ -535,14 +531,14 @@ class Twofish
     r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[11])
 
     # i = 1
-    t0 = xS0[r0 & 0xff] ^
-         xS1[(r0 >> 8) & 0xff] ^
-         xS2[(r0 >> 16) & 0xff] ^
-         xS3[(r0 >> 24) & 0xff]
-    t1 = xS0[(r1 >> 24) & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[(r1 >> 8) & 0xff] ^
-         xS3[(r1 >> 16) & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[(r0 >> 8) & 0xff] ^
+         @xS2[(r0 >> 16) & 0xff] ^
+         @xS3[(r0 >> 24) & 0xff]
+    t1 = @xS0[(r1 >> 24) & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[(r1 >> 8) & 0xff] ^
+         @xS3[(r1 >> 16) & 0xff]
 
     r2 ^= 0xffffffff & (t0 + t1 + @k[12])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
@@ -550,14 +546,14 @@ class Twofish
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[13])
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[(r2 >> 8) & 0xff] ^
-         xS2[(r2 >> 16) & 0xff] ^
-         xS3[(r2 >> 24) & 0xff]
-    t1 = xS0[(r3 >> 24) & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[(r3 >> 8) & 0xff] ^
-         xS3[(r3 >> 16) & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[(r2 >> 8) & 0xff] ^
+         @xS2[(r2 >> 16) & 0xff] ^
+         @xS3[(r2 >> 24) & 0xff]
+    t1 = @xS0[(r3 >> 24) & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[(r3 >> 8) & 0xff] ^
+         @xS3[(r3 >> 16) & 0xff]
 
     r0 ^= 0xffffffff & (t0 + t1 + @k[14])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
@@ -566,14 +562,14 @@ class Twofish
     r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[15])
 
     # i = 2
-    t0 = xS0[r0 & 0xff] ^
-         xS1[(r0 >> 8) & 0xff] ^
-         xS2[(r0 >> 16) & 0xff] ^
-         xS3[(r0 >> 24) & 0xff]
-    t1 = xS0[(r1 >> 24) & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[(r1 >> 8) & 0xff] ^
-         xS3[(r1 >> 16) & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[(r0 >> 8) & 0xff] ^
+         @xS2[(r0 >> 16) & 0xff] ^
+         @xS3[(r0 >> 24) & 0xff]
+    t1 = @xS0[(r1 >> 24) & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[(r1 >> 8) & 0xff] ^
+         @xS3[(r1 >> 16) & 0xff]
 
     r2 ^= 0xffffffff & (t0 + t1 + @k[16])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
@@ -581,14 +577,14 @@ class Twofish
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[17])
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[(r2 >> 8) & 0xff] ^
-         xS2[(r2 >> 16) & 0xff] ^
-         xS3[(r2 >> 24) & 0xff]
-    t1 = xS0[(r3 >> 24) & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[(r3 >> 8) & 0xff] ^
-         xS3[(r3 >> 16) & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[(r2 >> 8) & 0xff] ^
+         @xS2[(r2 >> 16) & 0xff] ^
+         @xS3[(r2 >> 24) & 0xff]
+    t1 = @xS0[(r3 >> 24) & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[(r3 >> 8) & 0xff] ^
+         @xS3[(r3 >> 16) & 0xff]
 
     r0 ^= 0xffffffff & (t0 + t1 + @k[18])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
@@ -597,14 +593,14 @@ class Twofish
     r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[19])
 
     # i = 3
-    t0 = xS0[r0 & 0xff] ^
-         xS1[(r0 >> 8) & 0xff] ^
-         xS2[(r0 >> 16) & 0xff] ^
-         xS3[(r0 >> 24) & 0xff]
-    t1 = xS0[(r1 >> 24) & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[(r1 >> 8) & 0xff] ^
-         xS3[(r1 >> 16) & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[(r0 >> 8) & 0xff] ^
+         @xS2[(r0 >> 16) & 0xff] ^
+         @xS3[(r0 >> 24) & 0xff]
+    t1 = @xS0[(r1 >> 24) & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[(r1 >> 8) & 0xff] ^
+         @xS3[(r1 >> 16) & 0xff]
 
     r2 ^= 0xffffffff & (t0 + t1 + @k[20])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
@@ -612,14 +608,14 @@ class Twofish
     r3 = ((r3 >> 31) & 1) | ((r3 & 0x7fffffff) << 1)
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[21])
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[(r2 >> 8) & 0xff] ^
-         xS2[(r2 >> 16) & 0xff] ^
-         xS3[(r2 >> 24) & 0xff]
-    t1 = xS0[(r3 >> 24) & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[(r3 >> 8) & 0xff] ^
-         xS3[(r3 >> 16) & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[(r2 >> 8) & 0xff] ^
+         @xS2[(r2 >> 16) & 0xff] ^
+         @xS3[(r2 >> 24) & 0xff]
+    t1 = @xS0[(r3 >> 24) & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[(r3 >> 8) & 0xff] ^
+         @xS3[(r3 >> 16) & 0xff]
 
     r0 ^= 0xffffffff & (t0 + t1 + @k[22])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
@@ -628,14 +624,14 @@ class Twofish
     r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[23])
 
     # i = 4
-    t0 = xS0[r0 & 0xff] ^
-         xS1[(r0 >> 8) & 0xff] ^
-         xS2[(r0 >> 16) & 0xff] ^
-         xS3[(r0 >> 24) & 0xff]
-    t1 = xS0[(r1 >> 24) & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[(r1 >> 8) & 0xff] ^
-         xS3[(r1 >> 16) & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[(r0 >> 8) & 0xff] ^
+         @xS2[(r0 >> 16) & 0xff] ^
+         @xS3[(r0 >> 24) & 0xff]
+    t1 = @xS0[(r1 >> 24) & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[(r1 >> 8) & 0xff] ^
+         @xS3[(r1 >> 16) & 0xff]
 
     r2 ^= 0xffffffff & (t0 + t1 + @k[24])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
@@ -643,14 +639,14 @@ class Twofish
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[25])
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[(r2 >> 8) & 0xff] ^
-         xS2[(r2 >> 16) & 0xff] ^
-         xS3[(r2 >> 24) & 0xff]
-    t1 = xS0[(r3 >> 24) & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[(r3 >> 8) & 0xff] ^
-         xS3[(r3 >> 16) & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[(r2 >> 8) & 0xff] ^
+         @xS2[(r2 >> 16) & 0xff] ^
+         @xS3[(r2 >> 24) & 0xff]
+    t1 = @xS0[(r3 >> 24) & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[(r3 >> 8) & 0xff] ^
+         @xS3[(r3 >> 16) & 0xff]
 
     r0 ^= 0xffffffff & (t0 + t1 + @k[26])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
@@ -659,14 +655,14 @@ class Twofish
     r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[27])
 
     # i = 5
-    t0 = xS0[r0 & 0xff] ^
-         xS1[(r0 >> 8) & 0xff] ^
-         xS2[(r0 >> 16) & 0xff] ^
-         xS3[(r0 >> 24) & 0xff]
-    t1 = xS0[(r1 >> 24) & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[(r1 >> 8) & 0xff] ^
-         xS3[(r1 >> 16) & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[(r0 >> 8) & 0xff] ^
+         @xS2[(r0 >> 16) & 0xff] ^
+         @xS3[(r0 >> 24) & 0xff]
+    t1 = @xS0[(r1 >> 24) & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[(r1 >> 8) & 0xff] ^
+         @xS3[(r1 >> 16) & 0xff]
 
     r2 ^= 0xffffffff & (t0 + t1 + @k[28])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
@@ -674,14 +670,14 @@ class Twofish
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[29])
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[(r2 >> 8) & 0xff] ^
-         xS2[(r2 >> 16) & 0xff] ^
-         xS3[(r2 >> 24) & 0xff]
-    t1 = xS0[(r3 >> 24) & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[(r3 >> 8) & 0xff] ^
-         xS3[(r3 >> 16) & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[(r2 >> 8) & 0xff] ^
+         @xS2[(r2 >> 16) & 0xff] ^
+         @xS3[(r2 >> 24) & 0xff]
+    t1 = @xS0[(r3 >> 24) & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[(r3 >> 8) & 0xff] ^
+         @xS3[(r3 >> 16) & 0xff]
 
     r0 ^= 0xffffffff & (t0 + t1 + @k[30])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
@@ -690,14 +686,14 @@ class Twofish
     r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[31])
 
     # i = 6
-    t0 = xS0[r0 & 0xff] ^
-         xS1[(r0 >> 8) & 0xff] ^
-         xS2[(r0 >> 16) & 0xff] ^
-         xS3[(r0 >> 24) & 0xff]
-    t1 = xS0[(r1 >> 24) & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[(r1 >> 8) & 0xff] ^
-         xS3[(r1 >> 16) & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[(r0 >> 8) & 0xff] ^
+         @xS2[(r0 >> 16) & 0xff] ^
+         @xS3[(r0 >> 24) & 0xff]
+    t1 = @xS0[(r1 >> 24) & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[(r1 >> 8) & 0xff] ^
+         @xS3[(r1 >> 16) & 0xff]
 
     r2 ^= 0xffffffff & (t0 + t1 + @k[32])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
@@ -705,14 +701,14 @@ class Twofish
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[33])
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[(r2 >> 8) & 0xff] ^
-         xS2[(r2 >> 16) & 0xff] ^
-         xS3[(r2 >> 24) & 0xff]
-    t1 = xS0[(r3 >> 24) & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[(r3 >> 8) & 0xff] ^
-         xS3[(r3 >> 16) & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[(r2 >> 8) & 0xff] ^
+         @xS2[(r2 >> 16) & 0xff] ^
+         @xS3[(r2 >> 24) & 0xff]
+    t1 = @xS0[(r3 >> 24) & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[(r3 >> 8) & 0xff] ^
+         @xS3[(r3 >> 16) & 0xff]
 
     r0 ^= 0xffffffff & (t0 + t1 + @k[34])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
@@ -721,14 +717,14 @@ class Twofish
     r1 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[35])
 
     # i = 7
-    t0 = xS0[r0 & 0xff] ^
-         xS1[(r0 >> 8) & 0xff] ^
-         xS2[(r0 >> 16) & 0xff] ^
-         xS3[(r0 >> 24) & 0xff]
-    t1 = xS0[(r1 >> 24) & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[(r1 >> 8) & 0xff] ^
-         xS3[(r1 >> 16) & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[(r0 >> 8) & 0xff] ^
+         @xS2[(r0 >> 16) & 0xff] ^
+         @xS3[(r0 >> 24) & 0xff]
+    t1 = @xS0[(r1 >> 24) & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[(r1 >> 8) & 0xff] ^
+         @xS3[(r1 >> 16) & 0xff]
 
     r2 ^= 0xffffffff & (t0 + t1 + @k[36])
     r2 = (r2 >> 1 & 0x7fffffff) | (r2 & 0x1) << 31
@@ -736,14 +732,14 @@ class Twofish
     r3 = ((r3 >> 31) & 1) | (r3 & 0x7fffffff) << 1
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[37])
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[(r2 >> 8) & 0xff] ^
-         xS2[(r2 >> 16) & 0xff] ^
-         xS3[(r2 >> 24) & 0xff]
-    t1 = xS0[(r3 >> 24) & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[(r3 >> 8) & 0xff] ^
-         xS3[(r3 >> 16) & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[(r2 >> 8) & 0xff] ^
+         @xS2[(r2 >> 16) & 0xff] ^
+         @xS3[(r2 >> 24) & 0xff]
+    t1 = @xS0[(r3 >> 24) & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[(r3 >> 8) & 0xff] ^
+         @xS3[(r3 >> 16) & 0xff]
 
     r0 ^= 0xffffffff & (t0 + t1 + @k[38])
     r0 = (r0 >> 1 & 0x7fffffff) | (r0 & 0x1) << 31
@@ -764,17 +760,15 @@ class Twofish
     r2 = @k[6] ^ words[2]
     r3 = @k[7] ^ words[3]
 
-    xS0, xS1, xS2, xS3 = *@s
-
     # i = 7
-    t0 = xS0[r0 & 0xff] ^
-         xS1[r0 >> 8 & 0xff] ^
-         xS2[r0 >> 16 & 0xff] ^
-         xS3[r0 >> 24 & 0xff]
-    t1 = xS0[r1 >> 24 & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[r1 >> 8 & 0xff] ^
-         xS3[r1 >> 16 & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[r0 >> 8 & 0xff] ^
+         @xS2[r0 >> 16 & 0xff] ^
+         @xS3[r0 >> 24 & 0xff]
+    t1 = @xS0[r1 >> 24 & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[r1 >> 8 & 0xff] ^
+         @xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
     r2 ^= 0xffffffff & (t0 + t1 + @k[38])
@@ -782,14 +776,14 @@ class Twofish
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[39])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[r2 >> 8 & 0xff] ^
-         xS2[r2 >> 16 & 0xff] ^
-         xS3[r2 >> 24 & 0xff]
-    t1 = xS0[r3 >> 24 & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[r3 >> 8 & 0xff] ^
-         xS3[r3 >> 16 & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[r2 >> 8 & 0xff] ^
+         @xS2[r2 >> 16 & 0xff] ^
+         @xS3[r2 >> 24 & 0xff]
+    t1 = @xS0[r3 >> 24 & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[r3 >> 8 & 0xff] ^
+         @xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
     r0 ^= 0xffffffff & (t0 + t1 + @k[36])
@@ -798,14 +792,14 @@ class Twofish
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 6
-    t0 = xS0[r0 & 0xff] ^
-         xS1[r0 >> 8 & 0xff] ^
-         xS2[r0 >> 16 & 0xff] ^
-         xS3[r0 >> 24 & 0xff]
-    t1 = xS0[r1 >> 24 & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[r1 >> 8 & 0xff] ^
-         xS3[r1 >> 16 & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[r0 >> 8 & 0xff] ^
+         @xS2[r0 >> 16 & 0xff] ^
+         @xS3[r0 >> 24 & 0xff]
+    t1 = @xS0[r1 >> 24 & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[r1 >> 8 & 0xff] ^
+         @xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
     r2 ^= 0xffffffff & (t0 + t1 + @k[34])
@@ -813,14 +807,14 @@ class Twofish
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[35])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[r2 >> 8 & 0xff] ^
-         xS2[r2 >> 16 & 0xff] ^
-         xS3[r2 >> 24 & 0xff]
-    t1 = xS0[r3 >> 24 & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[r3 >> 8 & 0xff] ^
-         xS3[r3 >> 16 & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[r2 >> 8 & 0xff] ^
+         @xS2[r2 >> 16 & 0xff] ^
+         @xS3[r2 >> 24 & 0xff]
+    t1 = @xS0[r3 >> 24 & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[r3 >> 8 & 0xff] ^
+         @xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
     r0 ^= 0xffffffff & (t0 + t1 + @k[32])
@@ -829,14 +823,14 @@ class Twofish
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 5
-    t0 = xS0[r0 & 0xff] ^
-         xS1[r0 >> 8 & 0xff] ^
-         xS2[r0 >> 16 & 0xff] ^
-         xS3[r0 >> 24 & 0xff]
-    t1 = xS0[r1 >> 24 & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[r1 >> 8 & 0xff] ^
-         xS3[r1 >> 16 & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[r0 >> 8 & 0xff] ^
+         @xS2[r0 >> 16 & 0xff] ^
+         @xS3[r0 >> 24 & 0xff]
+    t1 = @xS0[r1 >> 24 & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[r1 >> 8 & 0xff] ^
+         @xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
     r2 ^= 0xffffffff & (t0 + t1 + @k[30])
@@ -844,14 +838,14 @@ class Twofish
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[31])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[r2 >> 8 & 0xff] ^
-         xS2[r2 >> 16 & 0xff] ^
-         xS3[r2 >> 24 & 0xff]
-    t1 = xS0[r3 >> 24 & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[r3 >> 8 & 0xff] ^
-         xS3[r3 >> 16 & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[r2 >> 8 & 0xff] ^
+         @xS2[r2 >> 16 & 0xff] ^
+         @xS3[r2 >> 24 & 0xff]
+    t1 = @xS0[r3 >> 24 & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[r3 >> 8 & 0xff] ^
+         @xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
     r0 ^= 0xffffffff & (t0 + t1 + @k[28])
@@ -860,14 +854,14 @@ class Twofish
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 4
-    t0 = xS0[r0 & 0xff] ^
-         xS1[r0 >> 8 & 0xff] ^
-         xS2[r0 >> 16 & 0xff] ^
-         xS3[r0 >> 24 & 0xff]
-    t1 = xS0[r1 >> 24 & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[r1 >> 8 & 0xff] ^
-         xS3[r1 >> 16 & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[r0 >> 8 & 0xff] ^
+         @xS2[r0 >> 16 & 0xff] ^
+         @xS3[r0 >> 24 & 0xff]
+    t1 = @xS0[r1 >> 24 & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[r1 >> 8 & 0xff] ^
+         @xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
     r2 ^= 0xffffffff & (t0 + t1 + @k[26])
@@ -875,14 +869,14 @@ class Twofish
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[27])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[r2 >> 8 & 0xff] ^
-         xS2[r2 >> 16 & 0xff] ^
-         xS3[r2 >> 24 & 0xff]
-    t1 = xS0[r3 >> 24 & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[r3 >> 8 & 0xff] ^
-         xS3[r3 >> 16 & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[r2 >> 8 & 0xff] ^
+         @xS2[r2 >> 16 & 0xff] ^
+         @xS3[r2 >> 24 & 0xff]
+    t1 = @xS0[r3 >> 24 & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[r3 >> 8 & 0xff] ^
+         @xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
     r0 ^= 0xffffffff & (t0 + t1 + @k[24])
@@ -892,14 +886,14 @@ class Twofish
 
 
     # i = 3
-    t0 = xS0[r0 & 0xff] ^
-         xS1[r0 >> 8 & 0xff] ^
-         xS2[r0 >> 16 & 0xff] ^
-         xS3[r0 >> 24 & 0xff]
-    t1 = xS0[r1 >> 24 & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[r1 >> 8 & 0xff] ^
-         xS3[r1 >> 16 & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[r0 >> 8 & 0xff] ^
+         @xS2[r0 >> 16 & 0xff] ^
+         @xS3[r0 >> 24 & 0xff]
+    t1 = @xS0[r1 >> 24 & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[r1 >> 8 & 0xff] ^
+         @xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
     r2 ^= 0xffffffff & (t0 + t1 + @k[22])
@@ -907,14 +901,14 @@ class Twofish
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[23])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[r2 >> 8 & 0xff] ^
-         xS2[r2 >> 16 & 0xff] ^
-         xS3[r2 >> 24 & 0xff]
-    t1 = xS0[r3 >> 24 & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[r3 >> 8 & 0xff] ^
-         xS3[r3 >> 16 & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[r2 >> 8 & 0xff] ^
+         @xS2[r2 >> 16 & 0xff] ^
+         @xS3[r2 >> 24 & 0xff]
+    t1 = @xS0[r3 >> 24 & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[r3 >> 8 & 0xff] ^
+         @xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
     r0 ^= 0xffffffff & (t0 + t1 + @k[20])
@@ -923,14 +917,14 @@ class Twofish
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 2
-    t0 = xS0[r0 & 0xff] ^
-         xS1[r0 >> 8 & 0xff] ^
-         xS2[r0 >> 16 & 0xff] ^
-         xS3[r0 >> 24 & 0xff]
-    t1 = xS0[r1 >> 24 & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[r1 >> 8 & 0xff] ^
-         xS3[r1 >> 16 & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[r0 >> 8 & 0xff] ^
+         @xS2[r0 >> 16 & 0xff] ^
+         @xS3[r0 >> 24 & 0xff]
+    t1 = @xS0[r1 >> 24 & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[r1 >> 8 & 0xff] ^
+         @xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
     r2 ^= 0xffffffff & (t0 + t1 + @k[18])
@@ -938,14 +932,14 @@ class Twofish
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[19])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[r2 >> 8 & 0xff] ^
-         xS2[r2 >> 16 & 0xff] ^
-         xS3[r2 >> 24 & 0xff]
-    t1 = xS0[r3 >> 24 & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[r3 >> 8 & 0xff] ^
-         xS3[r3 >> 16 & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[r2 >> 8 & 0xff] ^
+         @xS2[r2 >> 16 & 0xff] ^
+         @xS3[r2 >> 24 & 0xff]
+    t1 = @xS0[r3 >> 24 & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[r3 >> 8 & 0xff] ^
+         @xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
     r0 ^= 0xffffffff & (t0 + t1 + @k[16])
@@ -954,14 +948,14 @@ class Twofish
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 1
-    t0 = xS0[r0 & 0xff] ^
-         xS1[r0 >> 8 & 0xff] ^
-         xS2[r0 >> 16 & 0xff] ^
-         xS3[r0 >> 24 & 0xff]
-    t1 = xS0[r1 >> 24 & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[r1 >> 8 & 0xff] ^
-         xS3[r1 >> 16 & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[r0 >> 8 & 0xff] ^
+         @xS2[r0 >> 16 & 0xff] ^
+         @xS3[r0 >> 24 & 0xff]
+    t1 = @xS0[r1 >> 24 & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[r1 >> 8 & 0xff] ^
+         @xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
     r2 ^= 0xffffffff & (t0 + t1 + @k[14])
@@ -969,14 +963,14 @@ class Twofish
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[15])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[r2 >> 8 & 0xff] ^
-         xS2[r2 >> 16 & 0xff] ^
-         xS3[r2 >> 24 & 0xff]
-    t1 = xS0[r3 >> 24 & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[r3 >> 8 & 0xff] ^
-         xS3[r3 >> 16 & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[r2 >> 8 & 0xff] ^
+         @xS2[r2 >> 16 & 0xff] ^
+         @xS3[r2 >> 24 & 0xff]
+    t1 = @xS0[r3 >> 24 & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[r3 >> 8 & 0xff] ^
+         @xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
     r0 ^= 0xffffffff & (t0 + t1 + @k[12])
@@ -985,14 +979,14 @@ class Twofish
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
     # i = 0
-    t0 = xS0[r0 & 0xff] ^
-         xS1[r0 >> 8 & 0xff] ^
-         xS2[r0 >> 16 & 0xff] ^
-         xS3[r0 >> 24 & 0xff]
-    t1 = xS0[r1 >> 24 & 0xff] ^
-         xS1[r1 & 0xff] ^
-         xS2[r1 >> 8 & 0xff] ^
-         xS3[r1 >> 16 & 0xff]
+    t0 = @xS0[r0 & 0xff] ^
+         @xS1[r0 >> 8 & 0xff] ^
+         @xS2[r0 >> 16 & 0xff] ^
+         @xS3[r0 >> 24 & 0xff]
+    t1 = @xS0[r1 >> 24 & 0xff] ^
+         @xS1[r1 & 0xff] ^
+         @xS2[r1 >> 8 & 0xff] ^
+         @xS3[r1 >> 16 & 0xff]
 
     r2 = r2 >> 31 & 0x1 | (r2 & 0x7fffffff) << 1
     r2 ^= 0xffffffff & (t0 + t1 + @k[10])
@@ -1000,14 +994,14 @@ class Twofish
     r3 ^= 0xffffffff & (t0 + ((t1 & 0x7fffffff) << 1) + @k[11])
     r3 = r3 >> 1 & 0x7fffffff | (r3 & 0x1) << 31
 
-    t0 = xS0[r2 & 0xff] ^
-         xS1[r2 >> 8 & 0xff] ^
-         xS2[r2 >> 16 & 0xff] ^
-         xS3[r2 >> 24 & 0xff]
-    t1 = xS0[r3 >> 24 & 0xff] ^
-         xS1[r3 & 0xff] ^
-         xS2[r3 >> 8 & 0xff] ^
-         xS3[r3 >> 16 & 0xff]
+    t0 = @xS0[r2 & 0xff] ^
+         @xS1[r2 >> 8 & 0xff] ^
+         @xS2[r2 >> 16 & 0xff] ^
+         @xS3[r2 >> 24 & 0xff]
+    t1 = @xS0[r3 >> 24 & 0xff] ^
+         @xS1[r3 & 0xff] ^
+         @xS2[r3 >> 8 & 0xff] ^
+         @xS3[r3 >> 16 & 0xff]
 
     r0 = r0 >> 31 & 0x1 | (r0 & 0x7fffffff) << 1
     r0 ^= 0xffffffff & (t0 + t1 + @k[8])
