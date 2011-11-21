@@ -1015,7 +1015,7 @@ class Twofish
     r1 ^= mask32(t0 + ((t1 & 0x7fffffff) << 1) + @k[9])
     r1 = r1 >> 1 & 0x7fffffff | (r1 & 0x1) << 31
 
-    [mask32(@k[0] ^ r2), mask32(@k[1] ^ r3), mask32(@k[2] ^ r0), mask32(@k[3] ^ r1)].pack("V4")
+    [@k[0] ^ r2, @k[1] ^ r3, @k[2] ^ r0, @k[3] ^ r1].pack("V4")
   end
 
 private
