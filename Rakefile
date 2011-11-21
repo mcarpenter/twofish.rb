@@ -1,4 +1,5 @@
 
+require 'benchmark'
 require 'rake'
 require 'rake/clean'
 require 'rake/testtask'
@@ -9,8 +10,12 @@ desc 'Default task (test)'
 task :default => [:test]
 
 Rake::TestTask.new('test') do |test|
-  test.pattern = 'test/*.rb'
+  test.pattern = 'test/test_*.rb'
   test.warning = true
+end
+
+Rake::TestTask.new('benchmark') do |test|
+  test.pattern = 'test/benchmark.rb'
 end
 
 SPECFILE = 'twofish.gemspec'

@@ -90,6 +90,17 @@ Aside from this README, rdoc documentation may be built as follows:
 The documentation will be built in the rdoc subdirectory.
 
 
+=== Benchmark
+
+A simple benchmark can be found in test/benchmark.rb and can be run
+thusly:
+
+    rake benchmark
+
+Ruby 1.9 is approximately three times faster than ruby 1.8.7
+(Ubuntu x86-64).
+
+
 === Bugs, omissions and weaknesses
 
 Encryption and decryption are (not unexpectedly) slow. If you need a
