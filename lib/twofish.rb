@@ -447,14 +447,14 @@ class Twofish
   # set to Mode::ECB then the IV will be ignored for any
   # encrypt/decrypt operations.
   def mode=(mode)
-    @mode = Mode::validate(mode)
+    @mode = Mode.validate(mode)
   end
 
   # Set the padding scheme for the (CBC mode) cipher
   # (Padding::NONE == :none or Padding::ZERO_BYTE ==
   # :zero_byte).
   def padding=(scheme)
-    @padding = Padding::validate(scheme)
+    @padding = Padding.validate(scheme)
   end
 
   # Return the cipher's block size in bytes.
@@ -465,7 +465,7 @@ class Twofish
   # Encrypt a plaintext string, chunking as required for
   # CBC mode.
   def encrypt(plaintext)
-    padded_plaintext = Padding::pad(plaintext, BLOCK_SIZE, self.padding)
+    padded_plaintext = Padding.pad(plaintext, BLOCK_SIZE, @padding)
     result = ''
     if @mode == Mode::CBC
       @iv = generate_iv(BLOCK_SIZE) unless @iv
@@ -473,7 +473,7 @@ class Twofish
     end
     (0..padded_plaintext.length-1).step(BLOCK_SIZE) do |block_ptr|
       (0..BLOCK_SIZE-1).each { |i| padded_plaintext[block_ptr+i] = ( padded_plaintext[block_ptr+i].ord ^ ciphertext_block[i].ord ).chr } if Mode::CBC == @mode
-      result << ciphertext_block = self.encrypt_block(padded_plaintext[block_ptr, BLOCK_SIZE])
+      result << ciphertext_block = encrypt_block(padded_plaintext[block_ptr, BLOCK_SIZE])
     end
     result
   end
@@ -494,12 +494,12 @@ class Twofish
     end
     (0..ciphertext.length-1).step(BLOCK_SIZE) do |block_ptr|
       ciphertext_block = ciphertext[block_ptr, BLOCK_SIZE]
-      plaintext_block = self.decrypt_block(ciphertext_block)
+      plaintext_block = decrypt_block(ciphertext_block)
       (0..BLOCK_SIZE-1).each { |i| plaintext_block[i] = (plaintext_block[i].ord ^ feedback[i].ord).chr } if Mode::CBC == @mode
       result << plaintext_block
       feedback = ciphertext_block
     end
-    Padding::unpad(result, BLOCK_SIZE, self.padding)
+    Padding.unpad(result, BLOCK_SIZE, @padding)
   end
 
   # Encrypt a single block (16 bytes).
@@ -1116,7 +1116,7 @@ module Mode
   # Takes a string or symbol and returns the lowercased
   # symbol representation if this is a recognized mode.
   # Otherwise, throws ArgumentError.
-  def Mode::validate(mode)
+  def self.validate(mode)
     mode_sym = mode.nil? ? DEFAULT : mode.to_s.downcase.to_sym
     raise ArgumentError, "unknown cipher mode #{mode.inspect}" unless ALL.include? mode_sym
     mode_sym
@@ -1150,7 +1150,7 @@ module Padding
   # Takes a string or symbol and returns the lowercased
   # symbol representation if this is a recognized padding scheme.
   # Otherwise, throws ArgumentError.
-  def Padding::validate(scheme)
+  def self.validate(scheme)
     scheme_sym = scheme.nil? ? DEFAULT : scheme.to_s.downcase.to_sym
     raise ArgumentError, "unknown padding scheme #{scheme.inspect}" unless ALL.include? scheme_sym
     scheme_sym
@@ -1159,7 +1159,7 @@ module Padding
   # Pad the given plaintext to a complete number of blocks. If
   # the padding scheme is :none and the plaintext is not a whole
   # number of blocks then ArgumentError is thrown.
-  def Padding::pad(plaintext, block_size, scheme=DEFAULT)
+  def self.pad(plaintext, block_size, scheme=DEFAULT)
     scheme_sym = validate(scheme)
     remainder = plaintext.length % block_size
     case scheme_sym
@@ -1176,7 +1176,7 @@ module Padding
   end
 
   # Unpad the given plaintext using the given scheme.
-  def Padding::unpad(plaintext, block_size, scheme=DEFAULT)
+  def self.unpad(plaintext, block_size, scheme=DEFAULT)
     scheme_sym = validate(scheme)
     case scheme_sym
     when NONE
