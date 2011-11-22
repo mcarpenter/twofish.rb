@@ -8,6 +8,7 @@
 # encryption algorithm based on original work by Guido Flohr.
 class Twofish
 
+  require 'string' # monkey patch for MRI 1.8.7
   require 'twofish/mode'
   require 'twofish/padding'
 
@@ -469,7 +470,7 @@ class Twofish
   # CBC mode.
   def encrypt(plaintext)
     padded_plaintext = Padding.pad(plaintext, BLOCK_SIZE, @padding)
-    result = ''
+    result = ''.force_encoding('ASCII-8BIT')
     if @mode == Mode::CBC
       @iv = generate_iv(BLOCK_SIZE) unless @iv
       ciphertext_block = @iv
@@ -486,7 +487,7 @@ class Twofish
   # as the initialization vector when chaining.
   def decrypt(ciphertext)
     raise ArgumentError, "Ciphertext is not a multiple of #{BLOCK_SIZE} bytes" unless (ciphertext.length % BLOCK_SIZE).zero?
-    result = ''
+    result = ''.force_encoding('ASCII-8BIT')
     if Mode::CBC == @mode
       if @iv
         feedback = @iv
