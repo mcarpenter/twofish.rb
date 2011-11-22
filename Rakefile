@@ -33,7 +33,6 @@ RDoc::Task.new do |rdoc|
   rdoc.options << '--charset' << 'utf-8'
   rdoc.options << '--all'
   rdoc.rdoc_files.include('README.rdoc')
-  rdoc.rdoc_files.include('lib/twofish.rb')
-  rdoc.rdoc_files.include('test/test_twofish.rb')
+  rdoc.rdoc_files.include(Dir[ 'lib/**/*' ])
 end
 

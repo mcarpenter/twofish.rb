@@ -37,7 +37,7 @@ class TestBasics < Test::Unit::TestCase
   end
 
   def test_default_mode
-    assert_equal(Mode::DEFAULT, Mode::ECB)
+    assert_equal(Twofish::Mode::DEFAULT, Twofish::Mode::ECB)
   end
 
 end
@@ -265,29 +265,29 @@ class TestPadding < TestBasics
   end
 
   def test_symbolize_padding
-    assert_equal(:zero_byte, Padding::validate('zero_byte'))
+    assert_equal(:zero_byte, Twofish::Padding::validate('zero_byte'))
   end
 
   def test_pad_none
     assert_raise ArgumentError do
-      Padding::pad(TO_PAD, BLOCK_SIZE, :none)
+      Twofish::Padding::pad(TO_PAD, BLOCK_SIZE, :none)
     end
   end
 
   def test_unpad_none
-    assert_equal(TO_PAD+"\0"*10, Padding::unpad(TO_PAD+"\0"*10, BLOCK_SIZE, :none))
+    assert_equal(TO_PAD+"\0"*10, Twofish::Padding::unpad(TO_PAD+"\0"*10, BLOCK_SIZE, :none))
   end
 
   def test_pad_zero_byte
-    assert_equal(TO_PAD+"\0"*10, Padding::pad(TO_PAD, BLOCK_SIZE, :zero_byte))
+    assert_equal(TO_PAD+"\0"*10, Twofish::Padding::pad(TO_PAD, BLOCK_SIZE, :zero_byte))
   end
 
   def test_unpad_zero_byte
-    assert_equal(TO_PAD, Padding::unpad(TO_PAD+"\0"*10, BLOCK_SIZE, :zero_byte))
+    assert_equal(TO_PAD, Twofish::Padding::unpad(TO_PAD+"\0"*10, BLOCK_SIZE, :zero_byte))
   end
 
   def test_pad_block_size_zero_byte
     to_pad = TO_PAD * BLOCK_SIZE
-    assert_equal(to_pad, Padding::pad(to_pad, BLOCK_SIZE, :zero_byte))
+    assert_equal(to_pad, Twofish::Padding::pad(to_pad, BLOCK_SIZE, :zero_byte))
   end
 end
