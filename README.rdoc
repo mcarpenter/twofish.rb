@@ -108,11 +108,6 @@ faster implementation for Ruby then the BouncyCastle provider
 (http://www.bouncycastle.org) plays well with JRuby (http://www.jruby.org).
 See above ("Unit tests") for a sample script.
 
-The original "pure Perl" implementation used Perl's integer pragma.
-This implementation uses a private method mask32 to strip off any high
-order bits in an effort to prevent (slow) promotion of Fixnums to Bignums.
-This is a little clumsy and probably could be quicker.
-
 Ruby >=1.9 introduces string encodings. The current workaround uses
 #ord and #chr but this is not very satisfactory: it would be preferable
 to move to byte arrays throughout.
