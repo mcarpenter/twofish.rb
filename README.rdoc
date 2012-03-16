@@ -117,6 +117,9 @@ byte" (append zero bytes to make up a full block). Zero byte padding has
 a well-known failure mode: if the plaintext terminates in null bytes
 then these may be erroneously removed when un-padding is performed.
 
+Possible implementation-dependent timing attacks (Bignum promotion,
+#pack(), ...).
+
 If no initialization vector is provided for CBC mode then the system
 random number generator (Kernel#rand) is used to generate one. The system
 random number generator may be weaker than desired.
