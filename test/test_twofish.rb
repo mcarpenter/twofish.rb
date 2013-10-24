@@ -277,6 +277,17 @@ class TestPadding < TestBasics
     assert_equal(:zero_byte, tf.padding)
   end
 
+  def test_cipher_iso10126_2_padding
+    tf = Twofish.new(NULL_KEY_16_BYTES)
+    tf.padding = :iso10126_2
+    assert_equal(:iso10126_2, tf.padding)
+  end
+
+  def test_cipher_iso10126_2_padding_constructor
+    tf = Twofish.new(NULL_KEY_16_BYTES, :padding => :iso10126_2)
+    assert_equal(:iso10126_2, tf.padding)
+  end
+
   def test_cipher_unknown_padding
     tf = Twofish.new(NULL_KEY_16_BYTES)
     assert_raise ArgumentError do
@@ -315,5 +326,24 @@ class TestPadding < TestBasics
   def test_pad_block_size_zero_byte
     to_pad = TO_PAD * BLOCK_SIZE
     assert_equal(to_pad, Twofish::Padding::pad(to_pad, BLOCK_SIZE, :zero_byte))
+  end
+
+  def test_pad_iso10126_2
+    padded_text = Twofish::Padding::pad(TO_PAD, BLOCK_SIZE, :iso10126_2)
+    assert_match(/\A#{TO_PAD}/, padded_text)
+    assert_equal(TO_PAD.length + 10, padded_text.length)
+  end
+
+  def test_unpad_iso10126_2
+    bytes = Array.new(10 - 1) {rand(256)}
+    bytes << 10
+    assert_equal(TO_PAD, Twofish::Padding::unpad(TO_PAD+bytes.pack("C*"), BLOCK_SIZE, :iso10126_2))
+  end
+
+  def test_pad_block_size_iso10126_2
+    to_pad = TO_PAD * BLOCK_SIZE
+    padded_text = Twofish::Padding::pad(to_pad, BLOCK_SIZE, :iso10126_2)
+    assert_equal(to_pad.length + BLOCK_SIZE, padded_text.length)
+    assert_match(/\A#{to_pad}/, padded_text)
   end
 end
