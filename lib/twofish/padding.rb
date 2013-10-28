@@ -17,8 +17,11 @@ class Twofish
     # Use zero byte padding.
     ZERO_BYTE = :zero_byte
 
+    # Use ISO 10126-2 padding.
+    ISO10126_2 = :iso10126_2
+
     # Array of all known paddings.
-    ALL = [ NONE, ZERO_BYTE ]
+    ALL = [ NONE, ZERO_BYTE, ISO10126_2 ]
 
     # Default padding (none).
     DEFAULT = NONE
@@ -50,6 +53,13 @@ class Twofish
         plaintext
       when ZERO_BYTE
         remainder.zero? ? plaintext : plaintext << "\0" * (block_size - remainder)
+      when ISO10126_2
+          number_of_pad_bytes = block_size - remainder
+          # Create random bytes
+          bytes = Array.new(number_of_pad_bytes - 1) {rand(256)}
+          # The last byte specify the total pad byte size
+          bytes << number_of_pad_bytes
+          plaintext << bytes.pack("C*")
       end
     end
 
@@ -66,9 +76,11 @@ class Twofish
         plaintext.dup
       when ZERO_BYTE
         plaintext.sub(/\000+\Z/, '')
+      when ISO10126_2
+        number_of_pad_bytes = plaintext.bytes.to_a[plaintext.length-1]
+        plaintext[0, (plaintext.length - number_of_pad_bytes)]
       end
     end
-
   end
 
 end
