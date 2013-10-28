@@ -112,10 +112,13 @@ Ruby >=1.9 introduces string encodings. The current workaround uses
 #ord and #chr but this is not very satisfactory: it would be preferable
 to move to byte arrays throughout.
 
-The only padding mechanisms implemented are "none" (don't pad) and "zero
-byte" (append zero bytes to make up a full block). Zero byte padding has
-a well-known failure mode: if the plaintext terminates in null bytes
+The only padding mechanisms implemented are "none", zero byte, and
+ISO 10126-2. PKCS#5/7 padding is not implemented.  Zero byte padding
+has a well-known failure mode: if the plaintext terminates in null bytes
 then these may be erroneously removed when un-padding is performed.
+
+Possible implementation-dependent timing attacks (Bignum promotion,
+#pack(), ...).
 
 If no initialization vector is provided for CBC mode then the system
 random number generator (Kernel#rand) is used to generate one. The system
