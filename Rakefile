@@ -31,6 +31,7 @@ RDoc::Task.new do |rdoc|
   rdoc.title = 'twofish.rb'
   rdoc.options << '--line-numbers'
   rdoc.options << '--charset' << 'utf-8'
+  rdoc.options << '--main' << 'README.rdoc'
   rdoc.options << '--all'
   rdoc.rdoc_files.include('README.rdoc')
   rdoc.rdoc_files.include(Dir[ 'lib/**/*' ])
