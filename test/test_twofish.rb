@@ -340,10 +340,12 @@ class TestPadding < TestBasics
     assert_equal(TO_PAD, Twofish::Padding::unpad(TO_PAD+bytes.pack("C*"), BLOCK_SIZE, :iso10126_2))
   end
 
-  def test_pad_block_size_iso10126_2
+  def test_pad_unpad_block_size_iso10126_2
     to_pad = TO_PAD * BLOCK_SIZE
     padded_text = Twofish::Padding::pad(to_pad, BLOCK_SIZE, :iso10126_2)
     assert_equal(to_pad.length + BLOCK_SIZE, padded_text.length)
     assert_match(/\A#{to_pad}/, padded_text)
+    assert_equal(to_pad, Twofish::Padding::unpad(padded_text, BLOCK_SIZE, :iso10126_2))
   end
+
 end
