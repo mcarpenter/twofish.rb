@@ -20,8 +20,11 @@ class Twofish
     # Use ISO 10126-2 padding.
     ISO10126_2 = :iso10126_2
 
+    # Use PKCS7 byte padding.
+    PKCS7 = :pkcs7
+
     # Array of all known paddings.
-    ALL = [ NONE, ZERO_BYTE, ISO10126_2 ]
+    ALL = [ NONE, ZERO_BYTE, ISO10126_2, PKCS7 ]
 
     # Default padding (none).
     DEFAULT = NONE
@@ -60,6 +63,9 @@ class Twofish
           # The last byte specify the total pad byte size
           bytes << number_of_pad_bytes
           plaintext << bytes.pack("C*")
+      when PKCS7
+        padding_length = (block_size - remainder - 1) % block_size + 1
+        plaintext << [padding_length].pack('C*') * padding_length
       end
     end
 
@@ -79,6 +85,10 @@ class Twofish
       when ISO10126_2
         number_of_pad_bytes = plaintext.bytes.to_a[plaintext.length-1]
         plaintext[0, (plaintext.length - number_of_pad_bytes)]
+      when PKCS7
+        # the padding length equals to the codepoint of the last char
+        padding_length = plaintext[-1..-1].unpack('C*')[0]
+        plaintext[0..(-1 * (padding_length + 1))]
       end
     end
   end

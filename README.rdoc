@@ -112,8 +112,9 @@ Ruby >=1.9 introduces string encodings. The current workaround uses
 #ord and #chr but this is not very satisfactory: it would be preferable
 to move to byte arrays throughout.
 
-The only padding mechanisms implemented are "none", zero byte, and
-ISO 10126-2. PKCS#5/7 padding is not implemented.  Zero byte padding
+The only padding mechanisms implemented are "none", zero byte,
+ISO 10126-2, and PKCS#7. PKCS#5 is not implemented, but can be achieved
+by using PKCS#7 with a BLOCK_SIZE equal to 8. Zero byte padding
 has a well-known failure mode: if the plaintext terminates in null bytes
 then these may be erroneously removed when un-padding is performed.
 
