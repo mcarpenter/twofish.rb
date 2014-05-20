@@ -24,7 +24,7 @@ class Twofish
     PKCS7 = :pkcs7
 
     # Array of all known paddings.
-    ALL = [ NONE, ZERO_BYTE, ISO10126_2, PKCS7 ]
+    ALL = [NONE, ZERO_BYTE, ISO10126_2, PKCS7]
 
     # Default padding (none).
     DEFAULT = NONE

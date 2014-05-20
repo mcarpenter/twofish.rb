@@ -1095,7 +1095,7 @@ private
 
     end
 
-    [ b >> 24, b >> 16 & 0xff, b >> 8 & 0xff, b & 0xff ]
+    [b >> 24, b >> 16 & 0xff, b >> 8 & 0xff, b & 0xff]
   end
 
   # Generates a random initialization vector of the given length.
