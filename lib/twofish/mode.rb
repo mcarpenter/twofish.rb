@@ -13,7 +13,7 @@ class Twofish
     CBC = :cbc
 
     # Array of all known modes.
-    ALL = [ CBC, ECB ]
+    ALL = [CBC, ECB]
 
     # Default mode (ECB).
     DEFAULT = ECB

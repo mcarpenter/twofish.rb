@@ -301,7 +301,7 @@ class Twofish
   # hash as follows:
   #   :mode => :ecb (default) or :cbc
   #   :iv => optional 16 byte initialization vector (randomly generated if not supplied)
-  #   :padding => :none (default), :zero_byte or :iso10126_2
+  #   :padding => :none (default), :zero_byte, :iso10126_2 or :pkcs7
   def initialize(key_string, opts={})
 
     self.mode = opts[:mode] # use setter for validation
@@ -456,7 +456,8 @@ class Twofish
 
   # Set the padding scheme for the (CBC mode) cipher
   # (Padding::NONE == :none, Padding::ZERO_BYTE ==
-  # :zero_byte, Padding::ISO10126_2 == :iso10126_2).
+  # :zero_byte, Padding::ISO10126_2 == :iso10126_2,
+  # Padding::PKCS7 == :pkcs7).
   def padding=(scheme)
     @padding = Padding.validate(scheme)
   end
@@ -1094,7 +1095,7 @@ private
 
     end
 
-    [ b >> 24, b >> 16 & 0xff, b >> 8 & 0xff, b & 0xff ]
+    [b >> 24, b >> 16 & 0xff, b >> 8 & 0xff, b & 0xff]
   end
 
   # Generates a random initialization vector of the given length.
