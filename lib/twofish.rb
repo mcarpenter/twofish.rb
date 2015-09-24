@@ -476,12 +476,12 @@ class Twofish
     result = ''.force_encoding('ASCII-8BIT')
     if @mode == Mode::CBC
       @iv ||= SecureRandom.random_bytes(BLOCK_SIZE)
-      ciphertext_block = @iv
+      @_feedback ||= @iv
     end
     (0...padded_plaintext.length).step(BLOCK_SIZE) do |block_ptr|
       plaintext_block = padded_plaintext[block_ptr, BLOCK_SIZE]
-      xor_block!(plaintext_block, ciphertext_block) if Mode::CBC == @mode
-      result << ciphertext_block = encrypt_block(plaintext_block)
+      xor_block!(plaintext_block, @_feedback) if Mode::CBC == @mode
+      result << @_feedback = encrypt_block(plaintext_block)
     end
     result
   end
@@ -495,20 +495,25 @@ class Twofish
     result = ''.force_encoding('ASCII-8BIT')
     if Mode::CBC == @mode
       if @iv
-        feedback = @iv
+        @_feedback ||= @iv
       else
-        feedback = ciphertext[0, BLOCK_SIZE]
+        @_feedback ||= ciphertext[0, BLOCK_SIZE]
         ciphertext = ciphertext[BLOCK_SIZE..-1]
       end
     end
     (0...ciphertext.length).step(BLOCK_SIZE) do |block_ptr|
       ciphertext_block = ciphertext[block_ptr, BLOCK_SIZE]
       plaintext_block = decrypt_block(ciphertext_block)
-      xor_block!(plaintext_block, feedback) if Mode::CBC == @mode
+      xor_block!(plaintext_block, @_feedback) if Mode::CBC == @mode
       result << plaintext_block
-      feedback = ciphertext_block
+      @_feedback = ciphertext_block
     end
     Padding.unpad!(result, BLOCK_SIZE, @padding)
+  end
+
+  # Reset the cipher state (for feedback modes).
+  def reset!
+    @_feedback = nil
   end
 
   # Exclusive-or two blocks together, byte-by-byte, storing the result
