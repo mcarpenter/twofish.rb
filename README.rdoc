@@ -115,10 +115,6 @@ to move to byte arrays throughout.
 Possible implementation-dependent timing attacks (Bignum promotion,
 #pack(), ...).
 
-If no initialization vector is provided for CBC mode then the system
-random number generator (Kernel#rand) is used to generate one. The system
-random number generator may be weaker than desired.
-
 The IV is not silently prepended to the ciphertext since if
 the resulting ciphertext is transmitted as is this can introduce
 a weakness. IV should ideally be transmitted OOB. There

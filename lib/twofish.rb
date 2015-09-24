@@ -8,6 +8,7 @@
 # encryption algorithm based on original work by Guido Flohr.
 class Twofish
 
+  require 'securerandom'
   require 'string' # monkey patch for MRI 1.8.7
   require 'twofish/mode'
   require 'twofish/padding'
@@ -306,7 +307,7 @@ class Twofish
 
     self.mode = opts[:mode] # use setter for validation
     self.padding = opts[:padding] # use setter for validation
-    @iv = opts[:iv] || generate_iv(BLOCK_SIZE) unless @mode == Mode::ECB
+    @iv = opts[:iv] || SecureRandom.random_bytes(BLOCK_SIZE) unless @mode == Mode::ECB
 
     # The key consists of k=len/8 (2, 3 or 4) 64-bit units.
     key = key_string.unpack("C*")
@@ -474,7 +475,7 @@ class Twofish
     padded_plaintext = Padding.pad!(plaintext, BLOCK_SIZE, @padding)
     result = ''.force_encoding('ASCII-8BIT')
     if @mode == Mode::CBC
-      @iv = generate_iv(BLOCK_SIZE) unless @iv
+      @iv ||= SecureRandom.random_bytes(BLOCK_SIZE)
       ciphertext_block = @iv
     end
     (0...padded_plaintext.length).step(BLOCK_SIZE) do |block_ptr|
@@ -1096,14 +1097,6 @@ private
     end
 
     [b >> 24, b >> 16 & 0xff, b >> 8 & 0xff, b & 0xff]
-  end
-
-  # Generates a random initialization vector of the given length.
-  # Warning: use Ruby standard library Kernel#rand.
-  def generate_iv(block_size)
-    Array.new(block_size).
-      map{ |x| rand(256) }.
-      pack("C#{block_size}") # defaults to ASCII-8BIT encoding
   end
 
 end
