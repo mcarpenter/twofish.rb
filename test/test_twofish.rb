@@ -135,13 +135,8 @@ end
 # Test the Cipher Block Chaining mode.
 class TestCbcEncryption < TestBasics
 
-  #                 123456781234567812345678123456781234567812
- #LONG_PLAINTEXT = 'this message is longer than the block size'
- #LONG_CIPHERTEXT = ['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'].pack('H*')
- #KEY = ['5d9d4eeffa9151575524f115815a12e0'].pack('H*')
- #IV = ['e75449212beef9f4a390bd860a640941'].pack('H*')
-  LONG_PLAINTEXT = ("\0"*32).freeze
-  LONG_CIPHERTEXT = ['9f589f5cf6122c32b6bfec2f2ae8c35ad491db16e7b1c39e86cb086b789f5419'].pack('H*').freeze
+  LONG_PLAINTEXT = ("\0"*64).freeze
+  LONG_CIPHERTEXT = ['9f589f5cf6122c32b6bfec2f2ae8c35ad491db16e7b1c39e86cb086b789f541905ef8c61a811582634ba5cb7106aa6416748d17e67848a7ac57a1033d3dcef56'].pack('H*').freeze
 
   def test_encryption_decryption_random_iv
     tf = Twofish.new(NULL_KEY_16_BYTES, :mode => :cbc)
@@ -173,6 +168,26 @@ class TestCbcEncryption < TestBasics
     iv = tf1.iv
     tf2 = Twofish.new(NULL_KEY_16_BYTES, :mode => :cbc, :iv => iv, :padding => :zero_byte)
     assert_equal(plaintext, tf2.decrypt(ciphertext))
+  end
+
+  def test_reset
+    tf = Twofish.new(NULL_KEY_16_BYTES, :mode => :cbc, :padding => :pkcs7)
+    iv = tf.iv
+    ciphertext = tf.encrypt(LONG_PLAINTEXT)
+    assert_not_equal(LONG_PLAINTEXT, tf.decrypt(ciphertext))
+    tf.reset!
+    assert_equal(iv, tf.iv)
+    assert_equal(LONG_PLAINTEXT, tf.decrypt(ciphertext))
+  end
+
+  def test_incremental
+    key = ['9f589f5cf6122c32b6bfec2f2ae8c35a'].pack('H*').freeze
+    iv = ['a74f3ed9a33ca158f3d09a629f9b26ba'].pack('H*').freeze
+    data = %w{ abcdefghijklmnop qrstuvwxyz123456 }
+    tf = Twofish.new(key, :iv => iv, :mode => :cbc)
+    result = data.inject('') { |ciphertext, block| ciphertext << tf.encrypt(block) }
+    assert_equal(["e14d0f030aa843b14b616928a1c18e8b76c008aa27015dd21bb747a18715172a"].pack('H*'),
+                 result)
   end
 
 end

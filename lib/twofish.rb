@@ -8,6 +8,7 @@
 # encryption algorithm based on original work by Guido Flohr.
 class Twofish
 
+  require 'securerandom'
   require 'string' # monkey patch for MRI 1.8.7
   require 'twofish/mode'
   require 'twofish/padding'
@@ -306,7 +307,7 @@ class Twofish
 
     self.mode = opts[:mode] # use setter for validation
     self.padding = opts[:padding] # use setter for validation
-    @iv = opts[:iv] || generate_iv(BLOCK_SIZE) unless @mode == Mode::ECB
+    @iv = opts[:iv] || SecureRandom.random_bytes(BLOCK_SIZE) unless @mode == Mode::ECB
 
     # The key consists of k=len/8 (2, 3 or 4) 64-bit units.
     key = key_string.unpack("C*")
@@ -474,13 +475,13 @@ class Twofish
     padded_plaintext = Padding.pad!(plaintext, BLOCK_SIZE, @padding)
     result = ''.force_encoding('ASCII-8BIT')
     if @mode == Mode::CBC
-      @iv = generate_iv(BLOCK_SIZE) unless @iv
-      ciphertext_block = @iv
+      @iv ||= SecureRandom.random_bytes(BLOCK_SIZE)
+      @_feedback ||= @iv
     end
     (0...padded_plaintext.length).step(BLOCK_SIZE) do |block_ptr|
       plaintext_block = padded_plaintext[block_ptr, BLOCK_SIZE]
-      xor_block!(plaintext_block, ciphertext_block) if Mode::CBC == @mode
-      result << ciphertext_block = encrypt_block(plaintext_block)
+      xor_block!(plaintext_block, @_feedback) if Mode::CBC == @mode
+      result << @_feedback = encrypt_block(plaintext_block)
     end
     result
   end
@@ -494,20 +495,25 @@ class Twofish
     result = ''.force_encoding('ASCII-8BIT')
     if Mode::CBC == @mode
       if @iv
-        feedback = @iv
+        @_feedback ||= @iv
       else
-        feedback = ciphertext[0, BLOCK_SIZE]
+        @_feedback ||= ciphertext[0, BLOCK_SIZE]
         ciphertext = ciphertext[BLOCK_SIZE..-1]
       end
     end
     (0...ciphertext.length).step(BLOCK_SIZE) do |block_ptr|
       ciphertext_block = ciphertext[block_ptr, BLOCK_SIZE]
       plaintext_block = decrypt_block(ciphertext_block)
-      xor_block!(plaintext_block, feedback) if Mode::CBC == @mode
+      xor_block!(plaintext_block, @_feedback) if Mode::CBC == @mode
       result << plaintext_block
-      feedback = ciphertext_block
+      @_feedback = ciphertext_block
     end
     Padding.unpad!(result, BLOCK_SIZE, @padding)
+  end
+
+  # Reset the cipher state (for feedback modes).
+  def reset!
+    @_feedback = nil
   end
 
   # Exclusive-or two blocks together, byte-by-byte, storing the result
@@ -1096,14 +1102,6 @@ private
     end
 
     [b >> 24, b >> 16 & 0xff, b >> 8 & 0xff, b & 0xff]
-  end
-
-  # Generates a random initialization vector of the given length.
-  # Warning: use Ruby standard library Kernel#rand.
-  def generate_iv(block_size)
-    Array.new(block_size).
-      map{ |x| rand(256) }.
-      pack("C#{block_size}") # defaults to ASCII-8BIT encoding
   end
 
 end
