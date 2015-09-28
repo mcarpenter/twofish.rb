@@ -442,7 +442,7 @@ class Twofish
   # must be a multiple of the block size.
   def iv=(iv)
     raise ArgumentError, 'cannot specify initialization vector for ECB mode' if @mode == Mode::ECB
-    raise ArgumentError, "initialization vectcor is not a multiple of #{BLOCK_SIZE} bytes" unless (iv.length % BLOCK_SIZE).zero?
+    raise ArgumentError, "initialization vector is not a multiple of #{BLOCK_SIZE} bytes" unless (iv.length % BLOCK_SIZE).zero?
     @iv = iv
   end
 
