@@ -9,7 +9,6 @@
 class Twofish
 
   require 'securerandom'
-  require 'string' # monkey patch for MRI 1.8.7
   require 'twofish/mode'
   require 'twofish/padding'
 
@@ -442,7 +441,7 @@ class Twofish
   # must be a multiple of the block size.
   def iv=(iv)
     raise ArgumentError, 'cannot specify initialization vector for ECB mode' if @mode == Mode::ECB
-    raise ArgumentError, "initialization vectcor is not a multiple of #{BLOCK_SIZE} bytes" unless (iv.length % BLOCK_SIZE).zero?
+    raise ArgumentError, "initialization vector is not a multiple of #{BLOCK_SIZE} bytes" unless (iv.length % BLOCK_SIZE).zero?
     @iv = iv
   end
 
@@ -471,9 +470,9 @@ class Twofish
   # Encrypt a plaintext string, chunking as required for
   # CBC mode.
   def encrypt(plaintext)
-    plaintext = plaintext.dup.force_encoding('ASCII-8BIT')
+    plaintext = to_binary(plaintext.dup)
     padded_plaintext = Padding.pad!(plaintext, BLOCK_SIZE, @padding)
-    result = ''.force_encoding('ASCII-8BIT')
+    result = to_binary('')
     if @mode == Mode::CBC
       @iv ||= SecureRandom.random_bytes(BLOCK_SIZE)
       @_feedback ||= @iv
@@ -490,9 +489,9 @@ class Twofish
   # chaining modes. If @iv is not set then we use the first block
   # as the initialization vector when chaining.
   def decrypt(ciphertext)
-    ciphertext = ciphertext.dup.force_encoding('ASCII-8BIT')
+    ciphertext = to_binary(ciphertext.dup)
     raise ArgumentError, "ciphertext is not a multiple of #{BLOCK_SIZE} bytes" unless (ciphertext.length % BLOCK_SIZE).zero?
-    result = ''.force_encoding('ASCII-8BIT')
+    result = to_binary('')
     if Mode::CBC == @mode
       if @iv
         @_feedback ||= @iv
@@ -1044,7 +1043,12 @@ class Twofish
     [@k[0] ^ r2, @k[1] ^ r3, @k[2] ^ r0, @k[3] ^ r1].pack("V4")
   end
 
-private
+  private
+
+  # Force String encoding to binary/8-bit ASCII. NB mutates argument.
+  def to_binary(s)
+    s.respond_to?(:force_encoding) ? s.force_encoding('BINARY') : s
+  end
 
   # The (12, 8) Reed Solomon code has the generator polynomial:
   #
