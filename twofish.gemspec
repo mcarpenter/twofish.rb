@@ -6,7 +6,6 @@ Gem::Specification.new do |s|
   s.email = 'mcarpenter@free.fr'
   s.extra_rdoc_files = %w{ LICENSE Rakefile README.rdoc }
   s.files = Dir[ 'lib/**/*', 'test/**/*' ]
-  s.has_rdoc = true
   s.homepage = 'http://mcarpenter.org/projects/twofish'
   s.licenses = [ 'BSD' ]
   s.name = 'twofish'
