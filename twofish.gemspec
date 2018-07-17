@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = %w{ LICENSE Rakefile README.rdoc }
   s.files = Dir[ 'lib/**/*', 'test/**/*' ]
   s.homepage = 'http://mcarpenter.org/projects/twofish'
-  s.licenses = [ 'BSD' ]
+  s.licenses = [ 'BSD-2-Clause' ]
   s.name = 'twofish'
   s.platform = Gem::Platform::RUBY
   s.require_path = 'lib'
