@@ -1,7 +1,7 @@
 # twofish.rb
 #
 # Author:: Martin Carpenter
-# Email:: mcarpenter@free.fr
+# Email:: martin.carpenter@gmail.com
 # Copyright:: Copyright (c) Martin Carpenter 2009
 #
 # Implements a class for symmetric encryption using the Twofish
