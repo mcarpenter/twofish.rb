@@ -1050,6 +1050,11 @@ class Twofish
     s.respond_to?(:force_encoding) ? s.force_encoding('BINARY') : s
   end
 
+  def to_binary(s)
+    return s.force_encoding('ASCII-8BIT') if s.respond_to?(:force_encoding)
+    s
+  end
+
   # The (12, 8) Reed Solomon code has the generator polynomial:
   #
   #      g(x) = x^4 + (a + 1/a) * x^3 + a * x^2 + (a + 1/a) * x + 1
